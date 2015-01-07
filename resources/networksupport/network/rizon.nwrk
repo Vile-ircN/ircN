@@ -1,0 +1,389 @@
+; services = http://www.rizon.net/vbulletin/forumdisplay.php?f=16
+
+
+on *:SIGNAL:loadnetsupport:{
+  scid $1
+  if ($nget(networksupport) == rizon) {
+    nset defaultservices N C M
+    nset netservices NickServ ChanServ MemoServ
+
+    ncid chanmode_adminchar $iifelse($prefixmatch(a),&)
+    ncid chanmode_ownerchar $iifelse($prefixmatch(q),~)
+
+    ncid can_vhost $false
+    ncid can_dccallow $false
+    ncid can_silence $false
+    ncid show.ircdstatuswin $true
+    nset netservices.shownicklist $true
+
+  }
+  scid -r
+}
+; when this network support file is unloaded when they switch to something else
+on *:SIGNAL:unloadnetsupport:{
+  scid $1
+  if ($nget(networksupport) == rizon) {
+    nset defaultservices
+    nset netservices  
+  }
+  scid -r
+}
+
+on *:SIGNAL:umode_unknown:{
+  scid $1
+  if ($nget(networksupport) == rizon) {
+    ncid umode_unknown $removecs($ncid(umode_unknown),+,x,r,S,c,D,R,p,G,g)
+  }
+  scid -r
+}
+menu channel,status {
+  $iif($nget(networksupport) == Rizon, Services)
+  .$iif(z isincs $chan(#).mode,$style(2) $tab - Rizon Services -):!
+  .$iif((# && z isincs $chan(#).mode),FunServ)
+  ..$iif(trivia ison #,$style(1)) Trivia { .msg trivia $iif(trivia ison #,remove,request) # }
+  ..$iif(quotes ison #,$style(1)) Quotes { .msg quotes $iif(quotes ison #,remove,request) # }
+  ..$iif(limitserv ison #,$style(1)) LimitServ { .msg limitserv $iif(limitserv ison #,remove,request) # }
+  ..$iif(internets ison #,$style(1)) Internets { .msg internets  $iif(internets ison #,remove,request) # }
+  ..$iif(erepublik ison #,$style(1)) eRepublik { .msg erepublik  $iif(erepublik ison #,remove,request) # }
+  ..$iif(e-sim ison #,$style(1)) eSim { .msg e-sim  $iif(e-sim ison #,remove,request) # }
+  .$iif($svc.ispopupok,HostServ)
+  ..On:!
+  ..Off:!
+  ..Group:!
+  ..Request:!
+  .$iif((# && z isincs $chan(#).mode),Botserv)
+  ..$iif(($calc($ctime - $nget(botserv.botlist)) >= 86400 || !$nget(botserv.botlist)),Botlist):.msg botserv botlist
+  ..-
+  ..Assign:.msg botserv assign # $$input(Enter botnickname:,e)
+  ..Unassign:!
+  ..-
+  ..Seen:say .seen $$input(Enter nickname:,e,Seen)
+  ..Emote:!
+  ..Say:!
+  ..Info:!
+  ..-
+  ..$style(2) $tab - Settings -:!
+  ..Kickers
+  ...Bolds
+  ....On:.msg botserv kick # bolds on
+  ....Off:.msg botserv kick # bolds off
+  ...Badwords
+  ....On:.msg botserv kick # badwords on
+  ....Off:.msg botserv kick # badwords off
+  ...Caps
+  ....On:.msg botserv kick # caps on
+  ....Off:.msg botserv kick # caps off
+  ...Colors
+  ....On:.msg botserv kick # colors on
+  ....Off:.msg botserv kick # colors off
+  ...Flood
+  ....On:.msg botserv kick # flood on
+  ....Off:.msg botserv kick # flood off
+  ...Repeat
+  ....On:.msg botserv kick # repeat on
+  ....Off:.msg botserv kick # repeat off
+  ...Reverses
+  ....On:.msg botserv kick # reverses on
+  ....Off:.msg botserv kick # reverses off
+  ...Underlines
+  ....On:.msg botserv kick # underlines on
+  ....Off:.msg botserv kick # underlines off
+  ..Badwords
+  ...List:!
+  ...Add:!
+  ...Rem:!
+  ...-
+  ...Clear:!
+  ..Don't kick ops
+  ...On:msg botserv set # dontkickops on
+  ...Off:msg botserv set # dontkickops off  
+  ..Don't kick voices
+  ...On:msg botserv set # dontkickvoices on
+  ...Off:msg botserv set # dontkickvoices off  
+  ..Greet
+  ...On:msg botserv set # greet on
+  ...Off:msg botserv set # greet off  
+  ..Fantasy cmds
+  ...On:msg botserv set # fantasy on
+  ...Off:msg botserv set # fantasy off  
+  ..Symbiosis
+  ...On:msg botserv set # symbiosis on
+  ...Off:msg botserv set # symbiosis off  
+  ..-
+  ..Detach this menu:!
+
+  .Help
+  ..Rizon Services:www http://wiki.rizon.net/index.php?title=Services_Commands
+  $iif(trivia ison #,Trivia-Bot) 
+  .Start:say .trivia $$input(Number of questsions,e)
+  .Stop:say .strivia
+  .-
+  .Stats:say .topten
+  .Rank:say .rank $$input(Nickname:,e,Rank,$me)
+  .-
+  .Theme
+  ..Anime:say .theme set anime
+  ..Default:say .theme set default    
+  ..Geography:say .theme set geography
+  ..History:say .theme set history
+  ..LOTR-Books:say .theme set LOTR-Books
+  ..LOTR-Movies:say .theme set LOTR-Movies
+  ..Movies:say .theme set Movies
+  ..Naruto:say .theme set naruto
+  ..Science-and-Nature:say .theme set scienceandnature
+  ..Simpsons:say .theme set simpsons
+  ..Stargate:say .theme set stargate
+
+  $iif(internets ison #,Internets-Bot) 
+  .Google:say .google $$input(Enter search term,e)
+  .Youtube:say .yt $$input(Enter search term,e)
+  .Calc:say .cc $$input(Math operation,e)
+  .Dictionary:say .dict $$input(Define word:,e)
+  .Shorten URL:say .expand $$input(Enter the long URL to shorten,e)
+  .Expand URL:say .expand $$input(Enter the short URL to expand,e)
+  .Forecast:say .f $$input(Zip or city,e)
+  .IMDB:say .imdb $$input(Movie name,e)                             
+  .Info:say .info
+  .IP Info:say .ipinfo $$input(Enter the IP/hostname to search,e)
+  .Bash
+  ..Random:say .bash random
+  ..Search:say .bash search $$input(Enter search term,e)
+  ..Number:say .bash $$input(Enter quote number,e)
+  .QDB
+  ..Random:say .qdb random
+  ..Search:say .qdb search $$input(Enter search term,e)
+  ..Number:say .qdb $$input(Enter quote number,e)
+  .FML
+  ..Random:say .fml random
+  ;  ..Search:say .qdb search $$input(Enter search term,e)
+  ..Number:say .fml $$input(Enter FML number,e)
+  .Urban:say .u $$input(Enter word to define,e)
+  .Weather:say .w $$input(Zip or city,e)
+  .Translate:!
+
+}
+/*
+menu status  {
+  $iif($nget(networksupport) == rizon,Mode)
+  .$iif(o isin $usermode,$iif(N isincs $usermode,$style(1)) net admin	+N) { toggleumode N }
+  .$iif(o isin $usermode,$iif(a isincs $usermode,$style(1)) server admin	+a) { toggleumode a }
+  .$iif(o isin $usermode,$iif(w isincs $usermode,$style(1)) server wallops	+w) { toggleumode w }
+  .$iif(o isin $usermode,$iif(z isincs $usermode,$style(1)) oper wallops	+z) { toggleumode z }
+  .$iif(o isin $usermode,$iif(l isincs $usermode,$style(1)) oper localwallops	+l) { toggleumode l }
+  .$iif(o isin $usermode,$iif(s isincs $usermode,$style(1)) servermsgs	+s) { toggleumode s }
+  .$iif(o isin $usermode,$iif(c isincs $usermode,$style(1)) client connections	+c) { toggleumode c }
+  .$iif(o isin $usermode,$iif(u isincs $usermode,$style(1)) unauth connections	+u) { toggleumode u }
+  .$iif(o isin $usermode,$iif(j isincs $usermode,$style(1)) rejected connections	+j) { toggleumode j }
+  .$iif(o isin $usermode,$iif(k isincs $usermode,$style(1)) server kills	+k) { toggleumode k }
+  .$iif(o isin $usermode,$iif(f isincs $usermode,$style(1)) iline notices	+f) { toggleumode f }
+  .$iif(o isin $usermode,$iif(y isincs $usermode,$style(1)) spy requests	+y) { toggleumode y }
+  .$iif(o isin $usermode,$iif(d isincs $usermode,$style(1)) server debug	+d) { toggleumode d }
+  .$iif(o isin $usermode,$iif(n isincs $usermode,$style(1)) nick changes	+n) { toggleumode n }
+  .$iif(o isin $usermode,$iif(X isincs $usermode,$style(1)) new serv & split	+X) { toggleumode X }
+  .$iif(o isin $usermode,$iif(b isincs $usermode,$style(1)) bot/join flood warnings	+b) { toggleumode b }
+}
+*/
+menu status  {
+  $iif($nget(networksupport) == rizon ,Usermode)
+  .$iif(!$nget(collapse.rizonmenu.status/umode),$style(1)) - Rizon User Modes - {
+    var %q = $nget(collapse.rizonmenu.status/umode)
+    nset collapse.rizonmenu.status/umode $iif(!%q,on)
+    iecho $iif(%q, Expanded, Collapsed) Status -> Usermode -> Rizon User Modes
+  }  
+  .$sup.popumode(A,A,hide, rizon, status/umode, Admin	+A) { toggleumode A }
+  .$sup.popumode(N,N,hide, rizon, status/umode, Network Admin	+N) { toggleumode N }
+  .$sup.popumode(N,$null, rizon, status/umode, Block CTCPs	+c) { toggleumode c }
+  .$sup.popumode(D,$null, rizon, status/umode, Block Chantext	+D) { toggleumode D } 
+  .$sup.popumode(R,$null, rizon, status/umode, PrivMSG from Reg'd only	+R) { toggleumode R }
+  .$sup.popumode(p,$null, rizon, status/umode, Privatize whois info	+p) { toggleumode p } 
+  .$sup.popumode(g,$null, rizon, status/umode, CallerID	+g) { toggleumode g }
+  .$sup.popumode(G,$null, rizon, status/umode, Soft CallerID	+G) { toggleumode G }
+  .$sup.popumode(r,r,hide, rizon, status/umode, Registered	+r) { toggleumode r }
+  .$sup.popumode(S,S,hide, rizon, status/umode, SSL Client	+S) { }
+  .$sup.popumode(x,$null, rizon, status/umode, Hide Host	+x) { }
+}
+menu channel {
+  $iif($nget(networksupport) == rizon,Mode)
+  .$iif(!$nget(collapse.rizonmenu.channel/mode),$style(1)) - Rizon Modes -  {
+    var %q = $nget(collapse.rizonmenu.channel/mode)
+    nset collapse.rizonmenu.channel/mode $iif(!%q,on)
+    iecho $iif(%q, Expanded, Collapsed) Channel -> Mode -> Rizon Modes 
+  }
+  .$sup.popcmode(#, A, op umode;A, rizon, channel/mode, Only Admins join	+A).and { togglecmode # A  }
+  .$sup.popcmode(#, O, op  umode;o , rizon, channel/mode, Only ircOps join	+O).and { togglecmode # O }  
+  .$sup.popcmode(#, R, op, rizon, channel/mode, Only Reg'd Join	+R) { togglecmode # R }  
+  .$sup.popcmode(#, M, op, rizon, channel/mode, Only Reg'd Speak	+M) { togglecmode # M }  
+  .$sup.popcmode(#, S, op, rizon, channel/mode, Only SSL join	+S) { togglecmode # S }  
+  .$sup.popcmode(#, c, op, rizon, channel/mode, No Colors	+c) { togglecmode # c }
+  .$sup.popcmode(#, C, op, rizon, channel/mode, No CTCPs	+C) { togglecmode # C }
+  .$sup.popcmode(#, N, op, rizon, channel/mode, No Notices	+N) { togglecmode # N }
+  .$sup.popcmode(#, p, op, rizon, channel/mode, Paranoia	+p) { togglecmode # c }
+  .$sup.popcmode(#, z, op, rizon, channel/mode, Permanent Channel	+z) { togglecmode # z }
+  .$sup.popcmode(#, B, op, rizon, channel/mode, Bandwidth Saver	+B) { togglecmode # B }
+
+  .Help
+  ..Rizon Channel Modes:www http://wiki.rizon.net/index.php?title=Channel_Modes
+}
+
+dialog rizonoper {
+  title "New Project"
+  size -1 -1 393 243
+  option dbu
+  check "Opers", 100, 2 6 36 13, push
+  check "Operwall", 101, 2 24 36 13, push
+  button "Button", 999, 11 230 50 25, hide ok
+  button "Button", 1, 43 4 344 223
+}
+
+on *:dialog:rizonoper:init:*:{
+  mdxinit $dname
+
+  mdx SetControlMDX $dname 1 Window > $shortfn($dd(dialog.mdx))
+
+
+  did -a $dname 1 grab $window(@operwall.rizon.12).hwnd @logview
+  did -c $dname 1
+  did -f $dname 1
+}
+alias rizondialog.cb return
+
+raw 211:*:{
+  ;$2 user
+  ;$3 sendq? 
+  ;$4 sent cmds
+  ;$5 sent bytes
+  ;$6 recv cmds
+  ;$7 recvd bytes
+  ;$9 last cmd time
+  iecho $2 
+  iecho sent $4 commands ( $alof($5) $+ )
+  iecho recvd $6 commands ( $+ $alof($7) $+ )
+  iecho cmd $duration($9) idle
+  iecho connected for $duration($nocolon($8))
+}
+
+#rizon.mapnetwork off
+raw 364:*:{
+  ; if ($curnet != rizon) return
+
+  if ($window(Links List).state == normal) window -h "Links List"
+
+  window -khs @rizonmap
+
+  aline @rizonmap $nocolon($4) $2 $3 
+  if ($window(Links List).state == normal) window -h "Links List"
+  haltdef
+
+}
+raw 365:*:{
+  ;  if ($curnet != rizon) return
+
+  if (!$isdir($nd(rizon\))) .mkdir $nd(rizon)
+
+  var %a = 1, %b
+  while (%a <= $line(@rizonmap,0)) {
+    set %b $line(@rizonmap,%a)
+    write $nd($curnet $+ -map.txt) %b
+    inc %a
+  }
+
+
+
+  if ($dialog(rizonmap)) rizonmap.refreshmap
+  .timercloselinkwin 1 1 if ($ $+ window("Links List")) window -c "Links List"
+  .disable #rizon.mapnetwork
+  haltdef
+}
+
+#rizon.mapnetwork end
+alias remap {
+  if ($window(@rizonmap)) clear @rizonmap
+  write -c $nd($curnet $+ -map.txt)
+  .enable #rizon.mapnetwork
+  links -n
+  nset servmap.last $ctime
+}
+alias servermap {
+
+  ; if ($calc($ctime - $nget(servmap.last)) >= 600) || (!$nget(servmap.last)) remap
+
+  if ($isfile($srvmapfile)) {
+    window -kh @rizonmap
+    clear @rizonmap
+    loadbuf @rizonmap $srvmapfile
+  }
+  dialog -ma rizonmap rizonmap
+  rizonmap.refreshmap
+}
+
+dialog rizonmap {
+  title "server map"
+  size -1 -1 498 498
+}
+
+on *:dialog:rizonmap:*:*: {
+  if ($devent == init) {
+    dcx Mark $dname rizonmap_cb
+    xdialog -b $dname +mntyz
+
+    ;// Call initilisation alias
+    rizonmap_init_dcx
+  }
+}
+
+alias -l rizonmap_init_dcx {
+  ;// Initialising control: (TreeView 1)
+  xdialog -c $dname 1 treeview 12 26 350 450 hasbuttons linesatroot haslines showsel tabstop
+  xdid -l $dname 1 16
+
+}
+alias  rizonmap.refreshmap {
+  var %a = 1, %b, %d = rizonmap
+  xdid -r %d 1
+  ;did -w rizonmap 1 +n 0 C:\ircN\modules\dccwin\icons\up.ico
+
+  while (%a <= $line(@rizonmap,0)) {
+    set %b $line(@rizonmap,%a)
+    tokenize 32 %b
+    if ($1 == 0)  xdid -a %d 1 $tab(-1, +b 1 1 0 0 0 -1 -1 $2, Tooltip)
+    else {
+      var %find = $xdid(rizonmap,1,$chr(9) $+ $3 $+ $chr(9) ,W,1).find
+      if (%find) {
+
+        xdid -a %d 1 $tab( %find -1, + 1 1 0 0 0-1 -1 $2, Tooltip)
+      }
+      else    xdid -a %d 1 $tab($iif($1 == 1,1,-1 -1), +b 1 1 0 0 0 -1 -1 $2, Tooltip)
+
+
+    }
+
+    inc %a
+  }
+
+  xdid -t %d 1 +a root
+  ;auto expand is annoying, especially since it makes it go offscreen/ having to scroll it up is annoying
+
+  ;select 'about'
+  xdid -c %d 1 1
+
+}
+;// Callback alias for dcxtest_1169967263
+alias rizonmap_cb {
+  if ($2 != mouse) {
+    ; echo $color(info) -s */ dcxtest_1169967263_cb: $1-
+  }
+}
+
+
+on *:NOTICE:*:?:{
+  if ($nick == Botserv) && ($site == rizon.net) {
+    if ($1- == Bot list:) { ndel botserv.botlist.* | nset botserv.botlist $ctime | ncid -u30 botserv.botlisting 1 }
+    elseif (bots available. isin $1-)  ncid -r botserv.botlisting
+    else {
+      if ($ncid(botserv.botlisting)) {
+        ; nset botserv.botlist. $+ $calc($hfind($nget,botserv.botlist.*,0,w) + 1) $1 $trim($2,$chr(40),$chr(41))
+        nset botserv.botlist. $+ $1 $trim($2,$chr(40),$chr(41))
+      }
+    }
+  }
+}

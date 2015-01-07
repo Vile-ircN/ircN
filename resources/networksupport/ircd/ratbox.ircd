@@ -1,0 +1,86 @@
+; set mode +D when i have over X pm windows open
+
+alias -l rat.popumode {
+  ;  <mode> <require> [hide] <text>
+  ; checked = 1, disabled = 2, both = 3
+
+  if ($nget(collapse.ratboxmenu.status/umode)) return 
+
+  var %s = 1, %t
+  if ($3 == hide) { var %hide = $true | set %t $4- }
+  else set %t $3-
+  if ($remove($2,-)) {
+    var %s = $popumode.flags($iif($prop == and,AND,OR), $2)
+    if (!%s) && (%hide) return
+  }
+
+  return $style( $iif($1 isincs $usermode, $iif(%s,1, 3) , $iif(!%s, 2) )) %t
+}
+
+menu nicklist {
+  $iif($1,Query)
+  .$iif((g isincs $usermode && $nget(ircdsupport) == ratbox),CallerID)
+  ..Add Allow:.quote accept $1
+  ..Rem Allow:.quote accept - $+ $1
+  ..-
+  ..CallerID Settings { dlg ircn.service.callerid }
+
+}
+menu status  {
+  $iif($nget(ircdsupport) == Ratbox ,Usermode)
+  .$iif(!$nget(collapse.ratboxmenu.status/umode),$style(1)) -  Ratbox IRCD User Modes - {
+    var %q = $nget(collapse.ratboxmenu.status/umode)
+    nset collapse.ratboxmenu.status/umode $iif(!%q,on)
+    iecho $iif(%q, Expanded, Collapsed) Status -> Usermode ->  Ratbox IRCD User Modes
+  }
+  .$rat.popumode(a,a,hide, Admin	+a) { toggleumode a }
+  .$rat.popumode(b,o,hide, Bot/Drone flood notices	+b) { toggleumode b } 
+  .$rat.popumode(c,o,hide, Connection notices	+c) { toggleumode c } 
+  .$rat.popumode(d,o,hide, Debugging notices	+d) { toggleumode d } 
+  .$rat.popumode(f,o,hide, I $+ $chr(58) $+ line full notices	+f) { toggleumode f } 
+  .$iif($calleridmode !isincs $usermode,$rat.popumode($calleridmode,$null, CallerID $tab + $+ $calleridmode)) {  toggleumode $calleridmode }
+  .$iif($calleridmode isincs $usermode,$rat.popumode($calleridmode,$null, CallerID $tab + $+ $calleridmode))  
+  ..$iif($calleridmode isincs $usermode, $style(1) Enabled) { toggleumode $calleridmode }
+  ..$iif($calleridmode isincs $usermode, -)
+  ..$iif($calleridmode isincs $usermode, CallerID Settings) { dlg ircn.service.callerid }
+
+  .$rat.popumode(k,o,hide, Kill notices	+k) { toggleumode k } 
+  .$rat.popumode(l,o,hide, LOCOPS messages	+l) { toggleumode l } 
+  .$rat.popumode(n,o,hide, Nick change notices	+n) { toggleumode n } 
+  .$rat.popumode(r,o,hide, Rejected client notices	+r) { toggleumode r } 
+  .$rat.popumode(u,o,hide, UnAuthed client notices	+u) { toggleumode u } 
+  .$rat.popumode(x,o,hide, Link/Split notices	+x) { toggleumode x } 
+  .$rat.popumode(y,o,hide, Spy	+y) { toggleumode y }     
+  .$rat.popumode(z,o,hide, Operwall	+z) { toggleumode z }     
+  .$rat.popumode(D,$null, Block Chantext	+D) { toggleumode D } 
+  .$rat.popumode(Z,o,hide, Operspy	+Z) { toggleumode Z }     
+  .$iif(!$nget(collapse.ratboxmenu.status/umode), Help)
+  ..Ratbox User Modes:www http://static.quadpoint.org/hybrid-docs/modes.txt
+  $iif($nget(ircdsupport) == ratbox, &Network)
+  .$iif($nget(ircdsupport) == ratbox, Stats $cmdtip(stats) )
+  ..$style(2) $tab - RatBox IRCD Stats - :!    
+  ..Online Oper list $tab $brak(p):.quote stats p $input(Enter server name: $paren(cancel to scan current server),e,Online ircOPs) 
+
+}
+alias -l calleridmode return $iif($ncid(server_callerid) isalpha,$v1,g)
+
+on *:SIGNAL:loadircdsupport:{
+  scid $1
+  if ($nget(ircdsupport) == ratbox) {
+    ncid can_callerid $true
+
+    ;   ncid can_vhost $true
+
+    ;    ncid show.ircdstatuswin $true
+    ;  nset netservices.shownicklist $true
+  }
+  scid -r
+}
+on *:SIGNAL:unloadircdsupport:{
+  scid $1
+  if ($nget(ircdsupport) == ratbox) {
+    ncid can_callerid  
+
+  }
+  scid -r
+}

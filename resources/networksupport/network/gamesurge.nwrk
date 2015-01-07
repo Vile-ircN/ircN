@@ -1,0 +1,115 @@
+; authserv
+;chanserv
+;memoserv
+;helpserv
+;spamserv
+;hostserv
+
+menu status {
+  $iif($nget(networksupport) == Gamesurge,services)
+  .AuthServ
+  ..Authenticate:!
+  ..Register:www http://www.gamesurge.net/createaccount/
+  ..Settings
+  ...Email:iecho $$input(Set email to,e,Authserv Email,$email)
+  ...Infoline:iecho $$input(Set email to,e,Authserv Email,$email) 
+  ...TableWidth:iecho $$input(Set width number to wrap services messages,e,Authserv TableWidth,0)
+  ...MaxLogins:iecho $$input(Number of users who can login to your authserv account at once,Authserv MaxLogins,0)
+  ...Color
+  ....On:authserv set color on
+  ....Off:authserv set  color off
+  ...PrivMSG
+  ....On:authserv set privmsg on
+  ....Off:authserv set privmsg off
+  ...Style
+  ....Default:authserv set style def
+  ....Zoot:authserv set style zoot
+  ...Language
+  ....C: authserv set language C
+  ....de: authserv set language de
+  ....en: authserv set language en
+  ....en_GB: authserv set language en_GB
+  ..-
+  ..Add Mask:!
+  ..Del Mask:!
+  ..Change Pass:!
+  ..Unregister:!
+  ..Rename:!   
+  ..Info?:authserv accountinfo $$input(Enter authserv username,e,Authserv account info,$me)
+
+
+  $iif($nget(networksupport) == gamesurge ,Usermode)
+  .$iif(!$nget(collapse.gamesurgemenu.status/umode),$style(1)) - GameSurge User Modes - {
+    var %q = $nget(collapse.gamesurgemenu.status/umode)
+    nset collapse.gamesurgemenu.status/umode $iif(!%q,on)
+    iecho $iif(%q, Expanded, Collapsed) Status -> Usermode -> GameSurge User Modes
+  }
+  .$gamesurge.popumode(x,$null, Hide Host	 $tab +x) { toggleumode x }
+  .$iif(!$nget(collapse.gamesurgemenu.status/umode), Help)
+  ..GameSurge User Modes:www http://www.gamesurge.net/userchanmodes/
+}
+menu channel {
+  $iif($nget(networksupport) == gamesurge,Mode)
+  .$iif(!$nget(collapse.gamesurgemenu.channel/mode),$style(1)) - GameSurge Modes -  {
+    if ($mouse.key & 4) {
+      var %q = $nget(collapse.gamesurgemenu.channel/mode)
+      nset collapse.gamesurgemenu.channel/mode $iif(!%q,on)
+      iecho $iif(%q, Expanded, Collapsed) Channel -> Chan -> Mode -> GameSurge Mode Popups
+    }
+    else unreal.channelmodes #
+  }
+  .$gamesurge.popcmode(#, u, op, Auditorium	+u) { togglecmode # u }
+
+  .Help
+  ..GameSurge Channel Modes: url http://www.gamesurge.net/userchanmodes/chan
+}
+
+
+alias -l gamesurge.popumode {
+  ;  <mode> <require> [hide] <text>
+  ; checked = 1, disabled = 2, both = 3
+
+  if ($nget(collapse.gamesurgemenu.status/umode)) return 
+
+  var %s = 1, %t
+  if ($3 == hide) { var %hide = $true | set %t $4- }
+  else set %t $3-
+  if ($remove($2,-)) {
+    var %s = $popumode.flags($iif($prop == and,AND,OR), $2)
+    if (!%s) && (%hide) return
+  }
+
+  return $style( $iif($1 isincs $usermode, $iif(%s,1, 3) , $iif(!%s, 2) )) %t
+}
+
+alias -l gamesurge.popcmode {
+  ; <chan> <mode> <require> <text>
+  ; checked = 1, disabled = 2, both = 3
+
+  if ($nget(collapse.gamesurgemenu.channel/mode)) return 
+
+  if ($2 isincs $chanmodes) {
+    var %s = 1
+    if ($remove($3,-)) var %s = $popcmode.flags($1, $iif($prop == and,AND,OR), $3)
+    return $style($iif($2 isincs $gettok($chan($1).mode, 1,32), $iif(%s,1, 3) , $iif(!%s, 2) )) $4-
+  }
+}
+
+on *:SIGNAL:loadnetsupport:{
+  scid $1
+  if ($nget(networksupport) == gamesurge) {
+
+    nset defaultservices 
+    nset netservices AuthServ ChanServ MemoServ SpamServ HostServ HelpServ
+    nset netwebsite www.gamesurge.net
+  }
+  scid -r
+}
+; when this network support file is unloaded when they switch to something else
+on *:SIGNAL:unloadnetsupport:{
+  scid $1
+  if ($nget(networksupport) == gamesurge) {
+    nset netservices  
+  }
+  scid -r
+}

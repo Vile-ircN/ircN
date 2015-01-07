@@ -1,0 +1,98 @@
+menu status  {
+  $iif($nget(networksupport) == Quakenet ,Usermode)
+  .$iif(!$nget(collapse.quakenetmenu.status/umode),$style(1)) - QuakeNet User Modes - {
+    var %q = $nget(collapse.quakenetmenu.status/umode)
+    nset collapse.quakenetmenu.status/umode $iif(!%q,on)
+    iecho $iif(%q, Expanded, Collapsed) Status -> Usermode -> QuakeNet User Modes
+  }
+
+  .$sup.popumode(d,$null, quakenet, status/umode, Block Chantext	+d) { toggleumode d }
+  .$sup.popumode(R,$null, quakenet, status/umode, PrivMSG from Reg'd only	+R) { toggleumode R }
+  .$sup.popumode(x,$null, quakenet, status/umode, Hide Host	+x) { toggleumode x }
+}
+
+menu status,channel {
+  $iif($nget(networksupport) == Quakenet && $svc.ispopupok($menutype), Services)
+  .$style(2) $tab - Network Services - :!
+  .Q
+  ..$style(2) $tab Account:!
+  ..Register:u.reg 
+  ..Auth :!
+  ..NewPass :!
+  ..$iif($chan,Request):msg r requestbot #
+  .$iif($chan,S)
+  ..$style(2) $tab Spam Scanner:!
+  ..Request:msg r requestspamscan #
+}
+menu channel {
+  $iif($nget(networksupport) == quakenet,Mode)
+  .$iif(!$nget(collapse.quakenetmenu.channel/mode),$style(1)) - QuakeNet Modes -  {
+    var %q = $nget(collapse.quanenetmenu.channel/mode)
+    nset collapse.quakenetmenu.channel/mode $iif(!%q,on)
+    iecho $iif(%q, Expanded, Collapsed) Channel -> Mode -> QuakeNet Modes
+  }
+  .$sup.popcmode(#, r, op, quakenet, channel/mode, Only Authed Join	+r) { togglecmode # r }
+  .$sup.popcmode(#, M, op, quakenet, channel/mode, Only Authed Speak	+M) { togglecmode # M }
+  .$sup.popcmode(#, c, op, quakenet, channel/mode, No Colors	+c) { togglecmode # c }
+  .$sup.popcmode(#, C, op, quakenet, channel/mode, No CTCPs	+C) { togglecmode # C }
+  .$sup.popcmode(#, N, op, quakenet, channel/mode, No Channel Notices	+N) { togglecmode # N }
+  .$sup.popcmode(#, u, op, quakenet, channel/mode, No Custom Quit/Part msgs	+u) { togglecmode # u }
+  .$sup.popcmode(#, u, op, quakenet, channel/mode, No multi-Channel msgs	+T) { togglecmode # T }
+  .$sup.popcmode(#, D, op, quakenet, channel/mode, Delayed joins	+D) { togglecmode # D }
+  .$sup.popcmode(#, d, op, quakenet, channel/mode, Hidden users present	+d) { iecho I don't think you can toggle this it just shows if there are still hidden users present | togglecmode # d }
+}
+
+alias -l u.reg {
+  var %a = $input(Enter email to register $me to,e,Undernet Q Bot,$email)
+  if (%a) u.q HELLO %a %a
+
+
+}
+alias -l u.q msg Q@CServe.quakenet.org $$1-
+on *:SIGNAL:umode_unknown:{
+  scid $1
+  if ($nget(networksupport) == quakenet) {
+    ncid umode_unknown $removecs($ncid(umode_unknown),+,x,R,d)
+  }
+  scid -r
+}
+; when this network support file is loaded on connect
+on *:SIGNAL:loadnetsupport:{
+  scid $1
+  if ($nget(networksupport) == quakenet) {
+    if (!$nvar($tab(authdlg,presets,QuakeNet-Q))) nvar $tab(authdlg,presets,QuakeNet-Q) $tab(/msg Q@CServe.quakenet.org AUTH <username> <pass>)
+
+    nset $tab(auth, disableghosting) on
+    nset $tab(auth, disableauthreq) on  
+
+    nset $tab(auth, autopreset) quakenet-q
+    nset defaultservices 
+    nset netservices Q S 
+    nset netservices.shownicklist $true
+  }
+  scid -r 
+}
+; when this network support file is unloaded when they switch to something else
+on *:SIGNAL:unloadnetsupport:{
+  scid $1
+  if ($nget(networksupport) == quakenet) {
+
+    nset $tab(auth, disableghosting)  
+    nset $tab(auth, disableauthreq)  
+    nset $tab(auth, autopreset)  
+    nset defaultservices 
+    nset netservices  
+  }
+  scid -r 
+}
+
+on *:UNLOAD:{
+  nvar $tab(authdlg,presets,Quakenet-Q)
+
+  if ($nget(networksupport) == quakenet) {
+
+    nset $tab(auth, disableghosting)  
+    nset $tab(auth, disableauthreq)  
+    nset $tab(auth, autopreset)  
+  }
+}

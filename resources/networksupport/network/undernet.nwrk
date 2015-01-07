@@ -1,0 +1,39 @@
+
+menu status {
+  $iif($nget(networksupport) == Undernet,services)
+  .X
+  ..Register:www http://cservice.undernet.org/live/newuser.php
+
+}
+
+
+on *:SIGNAL:loadnetsupport:{
+  scid $1
+  if ($nget(networksupport) == undernet) {
+    if (!$nvar($tab(authdlg,presets,Undernet-X)))   nvar $tab(authdlg,presets,Undernet-X) $tab(/msg X@channels.undernet.org LOGIN <username> <pass>)
+    nset $tab(auth, disableghosting) on
+    nset $tab(auth, disableauthreq) on  
+    nset $tab(auth, autopreset) undernet-x
+    nset netwebsite www.undernet.org
+    nset defaultservices 
+    nset netservices X
+    ncid can_silence $true
+  }
+  scid -r
+}
+; when this network support file is unloaded when they switch to something else
+on *:SIGNAL:unloadnetsupport:{
+  scid $1
+  if ($nget(networksupport) == undernet) {
+    nvar $tab(authdlg,presets,Undernet-X)
+    nset $tab(auth, disableghosting)  
+    nset $tab(auth, disableauthreq)  
+    nset $tab(auth, autopreset)  
+    nset netservices  
+    nset defaultservices 
+    ncid can_silence  
+  }
+  scid -r
+}
+
+on *:UNLOAD:nvar $tab(authdlg,presets,Undernet-X)

@@ -1,0 +1,70 @@
+;
+
+menu status {
+  $iif($nget(networksupport) == EFnet, Services)
+  .ChanFix:url http://www.EFnet.org/chanfix/
+}
+
+on *:SIGNAL:loadnetsupport:{
+  scid $1
+  if ($nget(networksupport) == EFnet) {
+
+    nset $tab(auth, disableall) on
+    nset defaultservices 
+    nset netservices ChanFix
+    nset netservices.nochanpop $true
+    nset netwebsite www.efnet.org
+
+  }
+  scid -r
+}
+; when this network support file is unloaded when they switch to something else
+on *:SIGNAL:unloadnetsupport:{
+  scid $1
+  if ($nget(networksupport) == EFnet) {
+    nset $tab(auth, disableall)
+
+    nset netservices  
+  }
+  scid -r
+}
+
+
+on *:UNLOAD:{
+  if ($nget(networksupport) == EFnet) {
+    nset $tab(auth, disableall)
+  }
+}
+
+/*
+menu status  {
+  $iif($nget(networksupport) == EFnet ,Usermode)
+  .$iif(!$nget(collapse.efnetmenu.status/umode),$style(1)) - EFnet User Modes - {
+    var %q = $nget(collapse.efnetmenu.status/umode)
+    nset collapse.efnetmenu.status/umode $iif(!%q,on)
+    iecho $iif(%q, Expanded, Collapsed) Status -> Usermode -> EFnet User Modes
+  }
+  .$efnet.popumode(A,A, Admin	+A) { toggleumode A }
+  .$iif(!$nget(collapse.efnetmenu.status/umode), Help)
+  ..EFnet User Modes:www http://www.efnet.org/?module=docs&doc=15
+
+}
+
+*/
+
+alias -l efnet.popumode {
+  ;  <mode> <require> [hide] <text>
+  ; checked = 1, disabled = 2, both = 3
+
+  if ($nget(collapse.efnetmenu.status/umode)) return 
+
+  var %s = 1, %t
+  if ($3 == hide) { var %hide = $true | set %t $4- }
+  else set %t $3-
+  if ($remove($2,-)) {
+    var %s = $popumode.flags($iif($prop == and,AND,OR), $2)
+    if (!%s) && (%hide) return
+  }
+
+  return $style( $iif($1 isincs $usermode, $iif(%s,1, 3) , $iif(!%s, 2) )) %t
+}

@@ -1,0 +1,34 @@
+The History of ircN
+
+		icN
+
+IrcN was first created by icN during the period of July 1996-December 1996 as a script known as Imm0rtal SC.  Upon its release in January of 1997, icN renamed the script ircN.  During the months that followed icN developed the first five versions of ircN.  Despite the fact that he was in his Junior year of college he still found time to work with the script, because in his own words mIRC scripting "is like typing".  After ircN 5 icN quit scripting ircN, seeking more of a challenge. These days he idles online and does html.  His site can be found at http://www.disasterandlove.com
+
+		Chutzpah
+
+After icN's departure, scripting for ircN was taken over by Chutzpah.  After almost four hundred hours of scripting and debugging, and after having rewritten almost 95% of the script, Chutzpah released ircN 6.0.  He continued scripting ircN through version 6.02 after which he left because he prefers Linux to Windows.  
+
+		Daedo
+
+There was a brief attempt at an ircN 7 by daedo, however this project did not get out of the beta stages.  The last version released by daedo was ircN 7rc.4.  This version can sometimes be found in warez channels and we warn you NOT to use it because it contains many bugs and exploits.  
+
+		The Quietust
+
+ircN scripting was then taken over by Quietust. Quietust began his scripting by creating patches for ircN 6.02's bugs.  He released ircN 6.03-ircN 6.04pl.2.  During this time of patching, Quietust also began work on an ircN 7.  He used daedo's work as a base to begin with, but during the many months of coding has replaced almost all the code with his own.
+
+		Sarek
+
+After another brief attempt at taking on the ircN project for the new ircN 8.00, Sarek's contributions never got out of the beta stages either.
+
+
+		zkx
+
+zkx joined the team when we were on the verge of giving up. He has added a tremendous amount of scripting work to ircN, and without his help ircN 8.0 would have never gotten nearly as complete as it is today.
+
+
+
+-------------- Current Team -------------- 
+
+		Vile
+
+Head scripter for ircN 8.xx

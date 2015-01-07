@@ -1,0 +1,24 @@
+Thanks to the following people and anyone who has been involved with ircN
+
+icN - started ircN
+Quietust - rewrote most of ircN for ircN7
+Alien88 - for hosting ircN's sites
+zkx - beta testing and helped with a lot of scripting
+slakker - beta testing and helped with some scripting
+mruno - beta testing and helped with some scripting
+unknownd - beta testing and helped with some scripting
+bartman - helped with some scripting, pays for ircN.org domain
+rx - beta testing and helped with some scripting
+silence - beta testing
+
+Base of ircN 8's theme engine:
+Kamek's Theme Engine by Kamek
+
+DLLs:
+kte.dll 		Kamek
+dcx.dll		ClickHeRe, twig*,Ook,andy & Mpdreamz
+mOTFv3.dll	danielson
+mTooltips 	EmiZ
+
+ircN Splash Screen Logos: 
+masl

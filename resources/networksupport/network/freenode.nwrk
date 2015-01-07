@@ -1,0 +1,266 @@
+/*
+;via /msg NickServ identify
+
+
+In May 2008, freenode switched from the outdated Theia services to the Atheme services package with some custom modules.
+
+atheme includes Chanserv, Nickserv, Memoserv and Alis (Advanced LIst Service). For more information about any of these, you can /msg <service> help while on freenode.
+
+*/
+; add +b $a:username registered user bans 
+; have to make an IBL but IQL for silenceed...  only way 'silence nonauthed' checkmark will work
+
+; might need to make an ON BAN for the +b $~z$#viletest-nossl to chanset mode_ban_nosslchanfwd #chan
+
+on *:DISCONNECT:{
+  if ($nget(networksupport) != freenode) return
+  if ($hget($cid $+ .ircN.freenode_qal)) hfree $cid $+ .ircN.freenode_qal
+
+}
+on *:BAN:#:{
+  if ($nget(networksupport) != freenode) return
+  if ($+($,z) == $banmask) {
+    chancid $chan mode_ban_ssl $true
+  }
+  elseif ($+($,~z) == $banmask) {
+    chancid $chan mode_ban_nonssl $true
+    chancid $chan mode_ban_nonssl_fwd 
+  }
+  elseif ($+($,~z,$,*) iswm $banmask) {
+    chancid $chan mode_ban_nonssl_fwd $remove($banmask,$+($,~z,$))
+    chancid $chan mode_ban_nonssl 
+  }
+}
+
+on *:UNBAN:#:{
+  if ($nget(networksupport) != freenode) return
+  if ($+($,z) == $banmask) chancid $chan mode_ban_ssl
+  elseif ($+($,~z) == $banmask) chancid $chan mode_ban_nonssl
+  elseif ($+($,~z,$,*) iswm $banmask)  chancid $chan mode_ban_nonssl_fwd 
+
+}
+; on /mode # chan +q list hmake $cid.ircn.freenode_qal hget.freenum
+; $hget.freenum($cod.ircn.freenode_qal,#chan.*)
+on *:rawmode:#:{
+  if ($nget(networksupport) != freenode) return
+  ; can be +q-v or +qv 
+  var %modes = $mode.match($1,$2-)
+  var %a  = 1
+  while ($mode.match_handle(%modes,%a) != $null) {
+    var %m = $ifmatch
+    if ($regex(%m,^[-+]q)) {
+      if ($mode.match_handle(%modes,%a).value == $+($,~a))  chancid $chan mode_quietnonauth $iif($left(%m,1) == +,$true)
+      if ($mode.match_handle(%modes,%a).value == $+($,a))  chancid $chan mode_quietauth $iif($left(%m,1) == +,$true)
+      var %h = $cid $+ .ircN.freenode_qal
+      if (!$hget(%h)) hmake %h 256
+      var %n = $hget.freenum(%h,$chan $+ .*)
+      hadd %h $+($chan,.,%n) $mode.match_handle(%modes,%a).value $fulladdress $ctime
+    } 
+    inc %a
+  }
+  ;   if ($mode(%a) == $+($,~a)) { chancid $chan mode_quietnonauth $true | iecho -w $chan mode_silencenonauth true }
+}
+
+on *:PART:#:{
+  if ($nget(networksupport) != freenode) return
+  if ($nick == $me) {
+    if ($hget($cid $+ .ircN.freenode_qal))  hdel -w $cid $+ .ircN.freenode_qal $+($chan,.*) 
+    if (!$hget($cid $+ .ircN.freenode_qal,0).item) hfree $cid $+ .ircN.freenode_qal 
+  }
+}
+
+alias updqal {
+  var %c
+  set %c $iif($1 ischan,$1,#)
+  if (!%c) return
+
+  if ($hget(cid $+ .ircN.freenode_qal)) hdel -w $cid $+ .ircN.freenode_qal $+(%c,.*) 
+  .quote mode %c +q
+}
+raw 729:*:{
+
+  if ($nget(networksupport) != freenode) return
+  ; after it finishes on 729 .. $hfind2($cid $+ .ircn.freenode_qal, $+($2,.*), $ $+ ~a *, w, w, @sdgsdg) ... then chancid mode_quietnonauth  $true
+
+  var %a = $hfind2($cid $+ .ircN.freenode_qal, $+($2,.*), $ $+ ~a *, w, w, $cidwin($+(qalsearch.,$chan)))
+  if (%a) chancid $2 mode_quietnonauth $true
+  var %a = $hfind2($cid $+ .ircN.freenode_qal, $+($2,.*), $ $+ a *, w, w, $cidwin($+(qalsearch.,$chan)))
+  if (%a) chancid $2 mode_quietauth $true
+
+  close -@ $cidwin($+(qalsearch.,$chan))
+  haltdef
+}
+raw 728:*:{
+  if ($nget(networksupport) != freenode) return
+  if ($3 != q) { echo -s wtf mode: $3- | return }
+  var %h = $cid $+ .ircN.freenode_qal
+  if (!$hget(%h)) hmake %h 256
+  var %n = $hget.freenum(%h,$2 $+ .*)
+  hadd %h $+($2.,%n) $4-
+  halt
+}
+menu nicklist  {
+  $iif(($nget(networksupport) == freenode && ($me isop # || $me ishop #)),Bans)
+  .$style(2) - Freenode Bans  - :!
+  .Ban Account	  $+($,a):iecho mode # +b $ $+ a: $+ $$input(Enter the users account name $paren(wildcards allowed),e,Ban account from #,$cwiget($1,regeduser))
+  .Ban Realname	 $+($,r):iecho mode # +b $+($,r:) $+ $$input(Which realname would you like to block from joining? [ $crlf ] [ $crlf ] ex: *hacker_bot_2000* [ $crlf ] [ $crlf ] note: underscore '_' matches both space ' ' and underscore. Wildcards are allowed,e,Ban Realname,$replace($cwiget($1,ircname),$chr(32),_))
+  ; .Ban Full match	 $+($,x):iecho mode # +b $+($,x:) $+ $$input(Which realname would you like to block from joining? [ $crlf ] [ $crlf ] ex: *hacker_bot_2000* [ $crlf ] [ $crlf ] note: underscore '_' matches both space ' ' and underscore. Wildcards are allowed,e,Ban Realname,$replace($cwiget($1,ircname),$chr(32),_))
+
+}
+menu channel {
+  $iif($nget(networksupport) == freenode,Mode)
+  .Help
+  ..Freenode Channel Modes:www https://freenode.net/using_the_network.shtml#modes
+
+  .$iif(!$nget(collapse.freenodemenu.channel/mode),$style(1)) - Freenode Modes -  {
+    var %q = $nget(collapse.freenodemenu.channel/mode)
+    nset collapse.freenodemenu.channel/mode $iif(!%q,on)
+    iecho $iif(%q, Expanded, Collapsed) Channel -> Mode -> Freenode Modes 
+  }
+  ; .$iif($chancid(#,mode_quietnonauth), $style(1)) Quiet non-authed	 +q $+($,~a) { quote mode # $iif($chancid(#,mode_quietnonauth),-,+) $+ q $+($,~a)  }
+  .$sup.popcmode(#, ~chancid(#,mode_quietnonauth), op, freenode, channel/mode,Quiet non-authed	  +q $+($,~a)) {  quote mode # $iif($chancid(#,mode_quietnonauth),-,+) $+ q $+($,~a)  }
+  .$sup.popcmode(#, ~chancid(#,mode_quietauth), op, freenode, channel/mode,Quiet authed	  +q $+($,a)) {  quote mode # $iif($chancid(#,mode_quietauth),-,+) $+ q $+($,a)  }
+  .$sup.popcmode(#, F ,op, freenode, channel/mode, Enable Forwarding	 +F) { togglecmode # f  }
+  .$sup.popcmode(#, Q ,op, freenode, channel/mode,Block Fwds	 +Q) { togglecmode # Q  }
+  .$sup.popcmode(#, s ,op, freenode, channel/mode,SSL only	 +s) { togglecmode # s  }
+  $iif(($nget(networksupport) == freenode && ($me isop # || $me ishop #)),Bans)
+  .$style(2) - Freenode Bans  - :!
+  .Help
+  ..Freenode Bantypes:www https://freenode.net/using_the_network.shtml#modes
+  .Quiet Hostmask	+q:iecho mode # +q $$input(Enter hostmask or nickname to silence in the channel,e)
+  .Ban Account	 $+($,a):iecho mode # +b ~n: $+ $$input(Enter the account name or wildmask,e)
+  .Ban Cant-Join	 $+($,j):mode # +b $+($,j:) $+ $$input(Enter secondary channel name which users have to be able to join to gain access to this channel,e)
+  .Ban Realname	 $+($,r):iecho mode # +b $+($,r:) $+ $$input(Which realname would you like to block from joining? [ $crlf ] [ $crlf ] ex: *hacker_bot_2000* [ $crlf ] [ $crlf ] note: underscore '_' matches both space ' ' and underscore. Wildcards are allowed,e,Ban Realname,$replace($cwiget($1,ircname),$chr(32),_))
+  .Ban Full match	 $+($,x):iecho mode # +b $+($,x:) $+ $$input(Which realname would you like to block from joining? [ $crlf ] [ $crlf ] ex: *hacker_bot_2000* [ $crlf ] [ $crlf ] note: underscore '_' matches both space ' ' and underscore. Wildcards are allowed,e,Ban Realname,$replace($cwiget($1,ircname),$chr(32),_))
+
+
+  .$iif($chancid(#,mode_ban_ssl),$style(1)) Ban SSL	 $+($,z):.quote mode # $iif($chancid(#,mode_ban_ssl),-,+) $+ b $+($,z)
+  .$iif($chancid(#,mode_ban_nonssl),$style(1)) Ban non-SSL	 $+($,~z):.quote mode # $iif($chancid(#,mode_ban_nonssl),-,+) $+ b $+($,~z)
+  .$iif($chancid(#,mode_ban_nonssl_fwd),$style(1)) Ban+Fwd non-SSL	 $+($,~z,$,$iifelse($chancid(#,mode_ban_nonssl_fwd),#____)):.quote mode # +b $+($,~z,$) $+ $$input(Channel to forward non-ssl users to,e,Fwd non-SSL,$iifelse($chancid(#,mode_ban_nonssl_fwd),# $+ -nossl))
+  $iif(($nget(ircdsupport) == unreal && $svc.ispopupok($menutype)),Services)
+  .$iif(a isincs $usermode,ServiceAdmin)
+  ..saMode $cmdtip(samode) :sajoin # $$input(Set Channel Mode: [ $cr ] $+ ex: +stn, e, Service Admin Force Channel Mode, $iifelse($chan(#).mode,+) )
+}
+
+
+
+on *:SIGNAL:ircN_DNS_bypass:{
+
+  var %r = /gateway/web/freenode/ip\.(.*)/i
+  if ($regex($gettok($address($1,0),2-,64),%r)) { 
+    set -nu1 %::dnsbypass 1
+    ; fix this to be themed
+    iecho 07.-13- 11DNS: resolved 10 $+ $1 $+  -> 10 $+ $regml(1)   
+  }
+  elseif (/ isin $gettok($address($1,0),2-,64)) { 
+    iecho can't resolve $1
+    set -nu1 %::dnsbypass 1
+  }
+}
+
+on *:SIGNAL:loadnetsupport:{
+  scid $1
+  if ($nget(networksupport) == freenode)  ncid invalid_hostmaskresolve_chars / 
+  scid -r
+}
+
+menu status {
+  $iif($nget(networksupport) == Freenode, Services)
+  .Alis
+  ..$iif($isfile($sys(channels\ $+ $curnet $+ -ALIS.txt)), Open cache $cmdtip(aliscache))  { if (($ismod(classicui)) && ($lines($sys(channels\ $+ $curnet $+ -ALIS.txt)) >= 3000)) dlg -r ircn.pleasewaitfreeze | .timer 1 1 aliscache }
+  ..-
+  ..List { msg alis LIST }
+  ..-
+  ..$iif(!$nget(alischan.nolistoptions),$style(1)) Use Critera $+ $chr(58) :ntog alischan.nolistoptions
+  ..Minimum $+ $chr(58) $tab $paren($iifelse($nget(alischan.min),$mopt(4,6)),[,]) :nset alischan.min $$input(Minimum amount of users in channel list, e, Channel List, $iifelse($nget(alischan.min),$mopt(4,6)))
+  ..Maximum $+ $chr(58) $tab $paren($iifelse($nget(alischan.max),$mopt(4,7)),[,]) :nset alischan.max $$input(Minimum amount of users in channel list, e, Channel List, $iifelse($nget(alischan.max),$mopt(4,7)))
+  ..Match Text $+ $chr(58) $tab $paren($iifelse($nget(alischan.max),___),[,]) :nset alischan.match $$input(Match channels in listing with this phrase $+ $chr(58), e, Channel List, $iifelse($nget(alischan.max),$mopt(4,7)))
+  ..Match Topic $+ $chr(58) $tab $paren($iifelse($nget(alischan.match),___),[,]) :nset alischan.match $$input(Match channels in listing with this phrase $+ $chr(58), e,Channel List, $iifelse($nget(alischan.max),$mopt(4,7)))
+  ..Match Mode $+ $chr(58) $tab $paren($iifelse($nget(alischan.mode),___),[,]) :nset alischan.mode $$input(Match channle mode in listing $paren(ex: [+|-|=><modes> - modes set/unset/equal), ,eChannel List, $iifelse($nget(alischan.modes),+r))
+  ..Skip first $+ $chr(58) $tab  $paren($iifelse($nget(alischan.skip),___),[,]) matches :nset alischan.skip $$input(Match channels in listing with this phrase $+ $chr(58), e, Channel List, $nget(alischan.skip))
+  Usermode
+  ; most of these are in ircd settings
+  ;  $iif($nget(networksupport) == freenode ,Usermode)
+  ;  .$iif(!$nget(collapse.freenodemenu.status/umode),$style(1)) - Freenode User Modes - {
+  ;    var %q = $nget(collapse.freenodemenu.status/umode)
+  ;    nset collapse.freenodemenu.status/umode $iif(!%q,on)
+  ;    iecho $iif(%q, Expanded, Collapsed) Status -> Usermode -> Freenode User Modes
+  ;  }  
+
+  ;.$sup.popumode(A,A,hide, rizon, status/umode, Admin	+A) { toggleumode A }
+  ;.$sup.popumode(N,N,hide, rizon, status/umode, Network Admin	+N) { toggleumode N }
+  ;.$sup.popumode(N,$null, rizon, status/umode, Block CTCPs	+c) { toggleumode c }
+  ; .$sup.popumode(D,$null, freenode, status/umode, Block Chantext	+D) { toggleumode D } 
+  ;.$sup.popumode(R,$null, freenode, status/umode, PrivMSG from Reg'd only	+R) { toggleumode R }
+  ; .$sup.popumode(g,$null, freenode, status/umode, CallerID	+g) { toggleumode g }
+  ; .$sup.popumode(Q,$null, freenode, status/umode, No Chan Fwding	+Q) { toggleumode Q }
+  ; .$sup.popumode(Z,Z,hide, freenode, status/umode, SSL Client	+Z) { }
+
+
+}
+on ^*:NOTICE:*:?:{
+  if ($nick == ALIS) && ($curnet == freenode) {
+    var %w = $cidwin(ALis-Channels)
+    ;/filter The -t switch sorts the output based on [c s], column C using character S as the columns separator.
+    var %f = $sys(channels\ $+ $curnet $+ -ALIS.txt)
+    if (Returning maximum of * iswm $1-) {
+      ncid alis.listing 1 
+      if (!$window(%w)) window -akbMl  -t30,40,10 %w
+      write -c %f $server $asctime
+      clear %w
+      iline %w 1 __________Channel__________ $+ $tab $+ __Size__ $+ $tab $+ __________Topic________
+      if ($4 isnum) ncid alis.chansize $4
+      halt
+    }
+    else {
+      if ($ncid(alis.listing)) {
+        if (Maximum channel output reached isin $1-) || (End of output isin $1-) { 
+          clear %w
+          ncid -r alis.*
+          iline %w 1 __________Channel__________ $+ $tab $+ __Size__ $+ $tab $+ __________Topic________
+          filter -fkteur $+(2,-,$lines(%f)) 2 32 %f _alis.results 
+          window -b %w
+          halt
+        }
+        else {
+          if (!$window(%w)) window -akbMl  -t30,40,10 %w
+          write %f $1 $2 $nocolon($3-)
+          !titlebar %w Channel Listing $paren($calc($lines(%f) - 1) $+ / $+  $iifelse($ncid(alis.chansize),???) ,[,])
+          halt
+        }
+      }
+    }
+
+    if (Maximum channel output reached isin $1-) || (End of output isin $1-) haltdef
+
+  }
+}
+menu @Alis-Channels.* {
+  dclick:if ($1 != 1)   join -n $gettok($line($active,$$1),1,9)
+}
+menu @Alis-Channels.* {
+  $iif($1,Join Channel):if ($1 != 1) join -n $gettok($1,1,9)
+  $iif($1,Show Users):if ($1 != 1) names $gettok($1,1,9)
+  -
+  ;  Filter:chanlist $$input(What would you like to filter the channel list with $+ $chr(58),e,Channel List,*)
+  ;  Refresh:chanlist *
+}
+
+
+alias _alis.results {
+  tokenize 32 $1-
+  var %w = $cidwin(Alis-Channels)
+  var %f = $sys(channels\ $+ $curnet $+ -ALIS.txt)
+  aline %w $tab($1,$2,$nocolon($3-))
+  if ($ncid(alis.chansize))  !titlebar %w Channel Listing $paren($calc($lines(%f) - 1) $+ / $+  $ncid(alis.chansize) ,[,])
+}
+alias aliscache {
+  var %w = $cidwin(Alis-Channels)
+  var %f = $sys(channels\ $+ $curnet $+ -ALIS.txt)
+  if (!$window(%w)) window -akbMl  -t30,40,10 %w
+  clear %w
+  iline %w 1 __________Channel__________ $+ $tab $+ __Size__ $+ $tab $+ __________Topic________
+  filter -fkteur $+(2,-,$lines(%f)) 2 32 %f _alis.results 
+  window -b %w
+  window -a %w
+}

@@ -1,0 +1,670 @@
+;
+; status responses to /who 
+; away = G .. here = H
+; registered = r .. bot = B
+; oper = * .. ! oper
+;
+
+on *:SIGNAL:ircN_DNS_bypass:{
+  if ((*.IP iswm $address($1,0)) || ($regex($_gettok($address($1,0),2,64,1,46), [a-zA-Z]-[A-Z0-9]))) { 
+    if (($istok($ncid(server_CMDS),userip,44)) && ($ncid(is_ircop))) {
+      ncid unreal_useripdns $addtok(unreal_useripdns,$1,44)
+      .quote userip $1
+    }
+    else { iecho unable to resolve $1 }
+    set -nu1 %::dnsbypass 1
+  }
+}
+raw 340:*:{
+  var %n = $gettok($2,1,61)
+  if ($istok($ncid(unreal_useripdns),%n,44)) {
+    set -u1 %:echo echo $color(info) -ti2 $+ $iif(($_isactive) && (@* !iswm $active), a, s)
+    set -nu1 %::me $me | set -nu1 %::server $server | set -nu1 %::port $port | set -nu1 %::cid $cid
+    set -nu1 %::pre 07.-13-
+    set -nu1 %::c1 10 | set -nu1 %::c2 11 | set -nu1 %::c3 13 | set -nu1 %::c4 00
+
+    set -nu1 %::nick %n
+    set -nu1 %::address $gettok($address(%n,0),2-,64)
+    set -nu1 %::iaddress $_gettok($2,2-,61,2,64)
+    set -nu1 %::naddress $gettok($address(%n,0),2-,64)
+    set -nu1 %::raddress $_gettok($2,2-,61,2,64)
+    %:echo 07.-13- 11DNS: resolved $iif( $+ %::nick,10 $+ %::nick $+  ->) 10 $+ %::address $+  -> 10 $+ %::raddress $+  | haltdef
+
+    if ($ial(%n)) ialset %n cdns %::iaddress
+    ncid unreal_useripdns $remtok($ncid(unreal_useripdns),%n,1,44)
+
+    unset %:echo %::nick %::address %::iaddress %::raddress %::naddress %::me %::server %::port %::cid %::pre %::c?
+    halt
+  }
+
+}
+
+on *:SIGNAL:umode_unknown:{
+  scid $1
+  if ($nget(ircdsupport) == unreal) {
+    ncid umode_unknown $removecs($ncid(umode_unknown),+,$calleridmode,x,t,g,h,W,H,G,p,r,z,N,A,R,a,q,T,d)
+  }
+  scid -r
+}
+alias unrealchan {
+  if ($1 !ischan) && (!$chan) { theme.syntax /unrealchan <#channel> | return }
+  var %a = 1, %b
+  while ($dialog(%a) != $Null) {
+    set %b $ifmatch
+    if (unreal.channelplus.* iswm %b) dialog -x %b
+    inc %a
+  }
+  dlg unreal.channelplus. $+ $1 unreal.channelplus
+}
+alias unreal.channelmodes.floodprot {
+  var %a = 1, %b
+  while ($dialog(%a) != $null) {
+    set %b $ifmatch
+    if (unreal.channelmode.floodprot.* iswm %b) dialog -x %b
+    inc %a
+  }
+  dlg unreal.channelmode.floodprot. $+ $1 unreal.channelmode.floodprot
+}
+dialog unreal.channelmode.floodprot {
+  title ""
+  size -1 -1 244 136
+  option dbu
+  check "Joins:", 1, 8 12 28 13
+  edit "", 2, 56 13 22 12
+  text "action:", 3, 83 14 24 11
+  check "Messages:", 4, 8 29 47 13
+  check Ctcps:, 5, 8 62 37 13
+  check Nick Change:, 6, 8 77 43 13
+  check Invite Knock:, 7, 8 92 43 13
+  check "Per-user Text:", 8, 8 46 47 13
+  combo 9, 109 14 44 41, size drop
+  check "unset in", 10, 156 13 32 11
+  edit "", 11, 188 13 23 12
+  text "min(s)", 12, 215 14 26 9
+  text "action:", 13, 83 32 24 11
+  edit "", 14, 56 31 22 12
+  combo 15, 109 32 44 41, size drop
+  check "unset in", 16, 156 31 33 11
+  edit "", 17, 188 31 23 12
+  text "min(s)", 18, 215 32 26 9
+  text "action:", 19, 83 48 24 11
+  combo 20, 109 48 44 41, size drop
+  check "unset in", 21, 156 47 33 11, hide
+  edit "", 22, 188 47 23 12, hide
+  text "min(s)", 23, 215 48 26 9, hide
+  edit "", 24, 56 47 22 12
+  edit "", 25, 56 63 22 12
+  text "action:", 26, 83 64 24 11
+  combo 27, 109 64 44 41, size drop
+  check "unset in", 28, 156 63 33 11
+  edit "", 29, 188 63 23 12
+  text "min(s)", 30, 215 64 26 9
+  edit "", 31, 56 78 22 12
+  text "action:", 32, 83 79 24 11
+  combo 33, 109 79 44 41, size drop
+  check "unset in", 34, 156 78 33 11
+  edit "", 35, 188 78 23 12
+  text "min(s)", 36, 215 79 26 9
+  edit "", 37, 56 92 22 12
+  text "action:", 38, 83 93 24 11
+  combo 39, 109 93 44 41, size drop
+  check "unset in", 40, 156 92 30 11
+  edit "", 41, 188 92 23 12
+  text "min(s)", 42, 215 93 26 9
+  button "&OK", 43, 198 113 39 16, ok
+  button "&Cancel", 44, 156 113 39 16, cancel
+  text "Per:", 45, 33 116 16 11
+  edit "15", 46, 50 115 26 13, center
+  text "seconds", 47, 79 117 49 10
+  box "", 48, 28 108 105 25
+}
+on *:DIALOG:unreal.channelmode.floodprot.*:sclick:43:{
+  var %chan = $gettok($dname,-1,46)
+  var %ok = 1
+
+  var %j = $iif($did(1).state, $did(2) $+ j $+ $chr(35) $+ $unreal.channelmode.floodprot.replaceaction($dname,9) $+ $iif(($did(10).state && $did(11) isnum),$did(11)) )
+  var %m = $iif($did(4).state, $did(14) $+ m $+ $chr(35) $+ $unreal.channelmode.floodprot.replaceaction($dname,15) $+ $iif(($did(16).state && $did(17) isnum),$did(17)) )
+  var %t = $iif($did(8).state, $did(24) $+ t $+ $chr(35) $+ $unreal.channelmode.floodprot.replaceaction($dname,20) $+ $iif(($did(21).state && $did(22) isnum),$did(22)) )
+  var %c = $iif($did(5).state, $did(25) $+ c $+ $chr(35) $+ $unreal.channelmode.floodprot.replaceaction($dname,27) $+ $iif(($did(28).state && $did(29) isnum),$did(29)) )
+  var %n = $iif($did(6).state, $did(31) $+ n $+ $chr(35) $+ $unreal.channelmode.floodprot.replaceaction($dname,33) $+ $iif(($did(34).state && $did(35) isnum),$did(35)) )
+  var %k = $iif($did(7).state, $did(37) $+ k $+ $chr(35) $+ $unreal.channelmode.floodprot.replaceaction($dname,39) $+ $iif(($did(40).state && $did(41) isnum),$did(41)) )
+
+  if (!$+(%j,%m,%t,%c,%n,%k)) {  mode %chan -f | %ok = 0 }
+  mode %chan +f $+($brak($tab(%j,%m,%t,%c,%n,%k).44), :, $did(46))
+
+  if ($dialog(unreal.channelplus. $+ %chan)) did $iif(%ok,-c,-u) unreal.channelplus. $+ %chan 14
+}
+alias unreal.channelmode.floodprot.replaceaction {
+  if ($prop == d) {  
+    ;j i
+    if ($1 == j) return 9 $replacecs($2,i,1,R,2)
+    if ($1 == m) return 15 $replacecs($2,m,1,M,2)
+    if ($1 == t) return 20 $replacecs($2,k,1,b,2)
+    if ($1 == c) return 27 $replacecs($2,C,1,m,2,M,3)
+    if ($1 == n) return 33 $replacecs($2,N,1)
+    if ($1 == k) return 39 $replacecs($2,K,1)
+  }
+
+  if ($2 == 9) return $replace($did($1,$2).sel,1,i,2,R)
+  if ($2 == 15) return $replace($did($1,$2).sel,1,m,2,M)
+  if ($2 == 20) return $replace($did($1,$2).sel,1,k,2,b)
+  if ($2 == 27) return $replace($did($1,$2).sel,1,C,2,m,3,M)
+  if ($2 == 33) return $replace($did($1,$2).sel,1,N)
+  if ($2 == 39) return $replace($did($1,$2).sel,1,K)
+
+}
+on *:DIALOG:unreal.channelmode.floodprot.*:init:0:{
+  var %c = $gettok($dname,-1,46)
+  dialog -t $dname Unreal IRCD Flood Protection in %c
+  did -a $dname 15 Moderated
+  did -a $dname 15 Reg'd Only
+  did -a $dname 9 Invite Only
+  did -a $dname 9 Reg'd Only
+  did -a $dname 20 Kick
+  did -a $dname 20 Ban
+  did -a $dname 27 No CTCPs
+  did -a $dname 27 Moderated
+  did -a $dname 27 Reg'd Only
+  did -a $dname 33  No NickChg
+  did -a $dname 39 No Knocks
+  did -c $dname 9,15,20,33,39,27 1
+
+  unreal.channelmode.floodprot.loaddids $dname $gettok($chancid(%c,unrealmode_floodprot),-1,58) $trimr($triml($deltok($chancid(%c,unrealmode_floodprot),-1,58),[),])
+}
+alias unreal.channelmode.floodprot.loaddids {
+  var %x = $1
+  var %a = 1, %b
+  var %time = $2
+
+  while ($gettok($3-,%a,44) != $null) {
+    set %b $ifmatch
+    var %num = $remove($gettok(%b,1,35),j,t,c,n,m,k)
+    var %type = $rmnum($gettok(%b,1,35))
+    var %act = $rmnum($gettok(%b,2,35))
+    var %exp =  $remove($gettok(%b,2,35),a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z)
+    var %q = $unreal.channelmode.floodprot.replaceaction(%type, %act).d
+    var %edid =  $gettok($wildtok(1:j 4:m 8:t 5:c 6:n 7:k,*: $+ %type,1,32),1,58)
+    var %tdid =  $gettok($wildtok(2:j 14:m 24:t 25:c 31:n 37:k,*: $+ %type,1,32),1,58)
+    var %udid =  $gettok($wildtok(10.11:j 16.17:m 21.22:t 28.29:c 34.35:n 40.41:k,*: $+ %type,1,32),1,58)
+    if (%edid) { 
+      did -c %x %edid 
+      if (%q) did -c %x $gettok(%q,1,32) $iifelse($gettok(%q,2,32),1)
+    }
+    ; iecho type: %type .. times: %num .. act: %act .. exp: %exp ... enabledid: %did .. 
+    did -ra %x %tdid %num
+    if (%exp) {
+      did -c %x $gettok(%udid,1,46) 
+      did -ra %x $gettok(%udid,2,46) %exp
+    }
+    inc %a
+  }
+
+
+}
+dialog unreal.channelplus {
+  title "Unreal IRCD Channel Modes"
+  size -1 -1 316 115
+  option dbu
+  check "(+A) Only Admins can join", 1, 11 15 89 12, disable
+  check "(+O) Only ircOps can join", 2, 11 25 89 12, disable
+  check "(+z) Only SSL clients can join", 3, 11 35 89 12
+  check "(+R) Only Registered can join", 4, 11 45 90 12
+  check "(+M) Only Registered can speak", 5, 11 55 89 12
+  check "(+Q) Only U:Lines can kick", 6, 11 65 91 12
+  check "(+c) No Colors", 7, 110 15 51 11
+  check "(+C) No CTCPs", 8, 110 25 51 11
+  check "(+V) No Invites", 9, 110 35 51 11
+  check "(+K) No Invite /knocks", 10, 110 45 82 11
+  check "(+N) No Nick changes", 11, 110 55 82 11
+  check "(+G) No Badwords", 12, 110 65 82 11
+  check "(+T) No Notices", 13, 110 75 92 11
+  check "(+j) Join Throttle", 15, 214 29 53 11
+  check "(+S) Strip colors", 16, 214 48 53 11
+  check "(+u) Auditorium", 17, 214 58 65 11
+  check "(+L) Over Limit Chan:", 18, 214 68 67 11
+  edit "", 19, 281 67 24 12, autohs
+  check "(+l) Limit:", 20, 236 81 43 10
+  edit "", 21, 281 80 24 12, autohs
+  box "Requirements", 22, 6 5 98 90
+  box "Restrictions", 23, 105 5 103 90
+  box "Restrictions", 24, 209 5 105 90
+  button "Open Channel Central", 97, 6 98 98 15
+  button "Cancel", 98, 276 98 38 15, cancel
+  button "OK", 100, 235 98 38 15, default ok
+  button "Flood Protection", 30, 239 13 72 12
+  edit "", 25, 269 34 17 14
+  text ":", 26, 286 37 4 8, center
+  edit "", 27, 290 34 17 14
+  box "users : seconds", 28, 267 26 44 24
+  check "(+f)", 14, 214 13 23 11
+  edit "", 88, 43 135 106 14
+}
+
+
+on *:MODE:#:{
+  if ($nget(ircdsupport) == unreal) {
+
+    if (L isincs $1) {
+      if (L isincs $chan($chan).mode) _unreal.parse.chanmodes - $chan $1-
+      else ncid -r $tab(chan,$chan,unrealmode_L_chan)
+    }
+    if (f isincs $1) {
+      if (f isincs $chan($chan).mode) _unreal.parse.chanmodes - $chan $1-
+      else ncid -r $tab(chan,$chan,unrealmode_floodprot)
+    }
+    if (j isincs $1) {
+      if (j isincs $chan($chan).mode) _unreal.parse.chanmodes - $chan $1-
+      else ncid -r $tab(chan,$chan,unrealmode_jointhrottle)
+    }
+  }
+}
+raw 324:*:{
+  if ($nget(ircdsupport) == unreal) {
+    _unreal.parse.chanmodes onjoin $2 $3-
+  }
+}
+alias -l _unreal.parse.chanmodes {
+  var %t = $1
+  var %c = $2
+  tokenize 32 $3-
+  if (L isincs $1) {
+    var %a = 1, %b
+    while ($gettok($2-,%a,32) != $null) {
+      set %b $ifmatch
+      if (%b isnum) { inc %a | continue }
+      if ($validchantype(%b)) chancid %c unrealmode_L_chan %b
+      inc %a
+    }
+  }
+  if (f isincs $1) {
+    if ($wildtok($2-,[*]:*,1,32)) {
+      chancid %c unrealmode_floodprot $ifmatch
+    }
+  }
+  if (j isincs $1) {
+    var %regex = /(\d{1,2}\:\d{1,2})/ 
+    if ($regex($2-,%regex)) {
+      chancid %c unrealmode_jointhrottle $regml(1)
+    }
+  }
+
+  if (%t == onjoin) {
+    if (L !isincs $1) && ($chancid(%c,unrealmode_L_chan)) ncid -r $tab(chan,%c,unrealmode_L_chan)
+  }
+}
+on *:PART:#:if ($nick == $me) hdel -w $ncid $tab(chan,$chan,unrealmode_*)
+
+on *:DIALOG:unreal.channelplus.*:init:0:{ 
+  dialog -t $dname Unreal IRCD Channel Modes: $gettok($dname,3,46)
+  var %c = $gettok($dname,3,46)
+  if ($me !ison %c) { dialog -x $dname | return }
+  var %m = $chan(%c).mode
+
+  var %dids = A:1 O:2 z:3 R:4 M:5 Q:6 c:7 C:8 V:9 K:10 N:11 G:12 T:13 f:14 j:15 S:16 u:17 L:18 l:20
+  var %a = 1, %mde, %did
+  while ($gettok(%dids,%a,32) != $null) {
+    set %mde $gettok($ifmatch,1,58)
+    set %did $gettok($ifmatch,2,58)
+    if (%mde isincs $gettok(%m,1,32)) did -c $dname %did 
+    else did -u $dname %did
+    if (%mde === j) { 
+      did -ra $dname 25 $gettok($chancid(%c, unrealmode_jointhrottle),1,58)
+      did -ra $dname 27 $gettok($chancid(%c, unrealmode_jointhrottle),2,58)
+    }
+    if (%mde === l) did -ra $dname 21 $gettok($chan(%c).mode,2,32)
+    if (%mde === L) did -ra $dname 19 $chancid(%c, unrealmode_L_chan)  
+    if ($me !isop %c) did -b $dname %did $+ $iif(%mde === L, $+($chr(44),19))  $+ $iif(%mde === l, $+($chr(44),21))
+    else did -e $dname %did  $+ $iif(%mde === L, $chr(44) 19)  $+ $iif(%mde === l, $chr(44) 21)
+
+    if (%mde === A) did $iif(A isincs $usermode,-e,-b) $dname 1
+    if (%mde === O) did $iif(o isincs $usermode,-e,-b) $dname 2
+
+    inc %a
+  }
+
+  if ($ismod(modernui)) {
+
+    ;   mtooltips  SetTooltipWidth  350
+    ;   .timer 1 0  set -u15 % $+ unrealchannel.tooltip $ $+ mtooltips(SpawnTooltip, +0tabs $ $+ calc( $ $+ dialog( $dname  ).x   + 10) $ $+ calc(  $ $+ dialog( $dname ).y  + $dialog( $dname ).ch ) 12000 > NOT_USED $chr(4) Hold down shift as you click the "Chan -> Mode- > Unreal IRCD Modes" popup to collapse/expand the Unreal menus. )
+
+  }
+
+}
+
+on *:dialog:unreal.channelplus.*:close:0:{
+  var %a = $gettok(%unrealchannel.tooltip ,2,32)
+  if (%a) mtooltips KillTooltip %a
+}
+on *:DIALOG:unreal.channelplus.*:sclick:14:{ 
+
+  var %c = $did($did).state
+  did -u $dname $did
+  if (%c) unreal.channelmodes.floodprot $gettok($dname,3,46)   
+
+}
+
+on *:DIALOG:unreal.channelplus.*:sclick:100:{ 
+  var %chan = $gettok($dname,-1,46)
+
+  var %flags, %rmflags, %editedvars, %vars
+
+  var %a = 1, %b, %dids = 1:A 2:O 3:z 4:R 5:M 6:Q 7:c 8:C 9:V 10:K 11:N 12:G 13:T 15:j 16:S 17:u 18:L 20:l 14:f
+
+
+  while ($gettok(%dids,%a,32) != $null) {
+    set %b $ifmatch
+    var %did = $gettok(%b,1,58)
+    var %flg = $gettok(%b,2,58)
+    if ($did(%did).state) {
+
+
+      if (($+($did(25),:,$did(27)) != $chancid(%chan,unrealmode_jointhrottle)) && (%flg === j)) { 
+        if ($did(25)) && ($did(27)) {  set %vars $addtok(%vars, $+($did(25),:,$did(27)),32)  | set %flags %flags $+ %flg }
+        else  set %rmflags %rmflags $+ %flg
+      }
+      elseif (%flg === L) && ($did(19) != $chancid(%chan,unrealmode_L_chan)) { 
+        if ($did(19)) { set %vars $addtok(%vars, $did(19),32) | set %flags %flags $+ %flg }
+        else set %rmflags %rmflags $+ %flg
+      }
+      elseif (%flg === l) && ($did(21) != $chan(%chan).limit) {
+        if ($did(21)) { set %vars $addtok(%vars, $did(21),32) | set %flags %flags $+ %flg  }
+        else set %rmflags %rmflags $+ %flg
+      }
+      else {
+        if (%flg isincs $chan(%chan).mode) { 
+          inc %a 
+          continue 
+        }
+
+        if (!$istokcs(j L l,%flg,32)) set %flags %flags $+ %flg
+      }
+    }
+    else {
+      if (%flg isincs $chan(%chan).mode)  set %rmflags %rmflags $+ %flg
+    }
+    inc %a
+  }
+
+
+  if (%flags) || (%rmflags) mode %chan $iif(%flags,$+(+, %flags)) $+ $iif(%rmflags, $+(-, %rmflags)) %vars
+
+}
+on *:DIALOG:unreal.channelplus.*:sclick:30:{  .timer 1 0 unreal.channelmodes.floodprot $gettok($dname,3,46)   }
+on *:DIALOG:unreal.channelplus.*:sclick:97:{  .timer 1 0 !channel $gettok($dname,3,46) | dialog -c $dname }
+menu status  {
+  $iif($nget(ircdsupport) == unreal ,Usermode)
+  .$iif(!$nget(collapse.unrealmenu.status/umode),$style(1)) - Unreal IRCD User Modes - {
+    var %q = $nget(collapse.unrealmenu.status/umode)
+    nset collapse.unrealmenu.status/umode $iif(!%q,on)
+    iecho $iif(%q, Expanded, Collapsed) Status -> Usermode -> Unreal IRCD User Modes
+  }  
+  .$sup.popumode(A,A,hide, unreal, status/umode, Admin	+A) { toggleumode A }
+  .$sup.popumode(N,N,hide, unreal, status/umode, Network Admin	+N) { toggleumode N }
+  .$sup.popumode(a,a,hide, unreal, status/umode, Services Admin	+a) { toggleumode a }
+  ; .$sup.popumode(B,$null, unreal, status/umode, Bot	+B) { toggleumode B }
+  .$sup.popumode(r,r,hide, unreal, status/umode, Registered	+r) { toggleumode r }
+  .$sup.popumode(h,h,hide, unreal, status/umode, Avail for Help	+h) { toggleumode h }
+  .$sup.popumode(q,a,hide, unreal, status/umode, Only U $+ $chr(58) $+ Lines can kick	+q) { toggleumode q }
+  .$sup.popumode(R,$null, unreal, status/umode, PrivMSG from Reg'd only	+R) { toggleumode R }
+  .$sup.popumode(d,$null, unreal, status/umode, Block Chantext	+d) { toggleumode d }
+  .$sup.popumode(G,$null, unreal, status/umode, Filter Badwords	+G) { toggleumode G }
+  .$sup.popumode(T,$null, unreal, status/umode, Block CTCPs	+T) { toggleumode T }
+  .$sup.popumode(x,$null, unreal, status/umode, Hide Host	+x) { toggleumode x }
+  .$sup.popumode(H,o O,hide, unreal, status/umode, Hide ircOP status	+H) { toggleumode H }
+  .$sup.popumode(p,o O,hide, unreal, status/umode, Hide Chans from Whois	+p) { toggleumode p }
+  .$sup.popumode(W,o O,hide, unreal, status/umode, Show Whois's	+W) { toggleumode W }
+  .$sup.popumode(v,o O,hide, unreal, status/umode, Show Inf dcc notices	+v) { toggleumode v }
+  .$sup.popumode(g,o O,hide, unreal, status/umode, Can GlobOps	+g) { toggleumode g }
+  .$sup.popumode(t,t,hide, unreal, status/umode, Using vHost	+t) { toggleumode t }
+  .$sup.popumode(z,z,hide, unreal, status/umode, SSL Client	+z) { }
+  .$iif(!$nget(collapse.unrealmenu.status/umode), Help)
+  ..Unreal User Modes:www http://www.unrealircd.com/files/docs/unreal32docs.html#userchannelmodes
+  $iif(($nget(ircdsupport) == unreal && $ncid(show.ircdstatuswin)),Unreal IRCd)
+  .$style(2) $tab - Commands - :!
+  .Set IRC name $cmdtip(setname) {
+    var %q = $$input(Set your realname without having to reconnect,e,Set Realname, $iifelse($cwiget($me,ircname),$readini($mircini,mirc,user)))
+    if (%q) {  .quote setname %q |  cwiset $me ircname %q }
+  }
+
+  ; .-
+  ; .$iif(o isincs $usermode,kline list):unreal.klinelist
+  ; setname = changes realname w/o reconnecting
+  ;watch
+  ;vhost
+  ; userip <nick>
+  ;wallops <message>
+  ;chatops <message>
+  ;locops <message>
+  ;adchat <message>
+  ;nachat <message  netadmins
+  ;kill nick
+  .-
+  .$style(2) $tab - Settings  - :!
+  .$iif(!$nget(collapse.unrealmenu.status/umode),$style(1)) Unreal User Mode Popups {
+    var %q = $nget(collapse.unrealmenu.status/umode)
+    nset collapse.unrealmenu.status/umode $iif(!%q,on)
+    iecho $iif(%q, Expanded, Collapsed) Status -> Usermode -> Unreal IRCD User Modes
+  }
+  .$iif(!$nget(collapse.unrealmenu.channel/mode),$style(1)) Unreal Channel Mode Popups {
+    var %q = $nget(collapse.unrealmenu.channel/mode)
+    nset collapse.unrealmenu.channel/mode $iif(!%q,on)
+    iecho $iif(%q, Expanded, Collapsed) Channel -> Chan -> Mode -> Unreal Mode Popups
+  }
+  .-
+  .Documentation $tab unrealircd.com: www http://www.unrealircd.com/
+
+  ; $iif(($ismod(ircop) && $nget(ircdsupport) == unreal),ircop)
+  ;  $iif($nget(ircdsupport) == unreal,ircOP)
+  ; .test:iecho from unreal.ircd
+
+  $iif($nget(ircdsupport) == unreal, &Network)
+  .$iif($nget(ircdsupport) == unreal, Stats $cmdtip(stats) )
+  ..$style(2) $tab - Unreal IRCD Stats - :!    
+  ..Ban Version list $tab $brak(B):.quote stats B
+  ..Bad Words list $tab $brak(b):.quote stats b
+  ..Link Block list $tab $brak(C):.quote stats C
+  ..Deny Link list $paren(auto) $tab $brak(d):.quote stats d
+  ..Deny Link list $paren(all) $tab $brak(D):.quote stats D
+  ..Except Throttle list  $tab $brak(e):.quote stats e
+  ..Except Ban list  $tab $brak(E):.quote stats E
+  ..Spam Filter list  $tab $brak(f):.quote stats f
+  ..Dcc Deny list  $tab $brak(F):.quote stats F
+  ..G $+ $chr(58) $+ Line list  $tab $brak(G):.quote stats G
+  ..Allow list  $tab $brak(I):.quote stats I
+  ..Official Chan list  $tab $brak(j):.quote stats j
+  ..K $+ $chr(58) $+ Line list  $tab $brak(K):.quote stats K
+  ..Link Info $paren(local) $tab $brak(l):.quote stats l
+  ..Link Info $paren(global) $tab $brak(L):.quote stats L
+  ..Commands $tab $brak(M):.quote stats M
+  ..Realname Ban list $tab $brak(n):.quote stats n
+  ..IRC Operators $tab $brak(O):.quote stats O
+  ..Port Info $tab $brak(P):.quote stats P
+  ..SQLine list $tab $brak(q):.quote stats q
+  ..Ban Nick list $tab $brak(Q):.quote stats Q
+  ..Chan Restrict list $tab $brak(r):.quote stats r
+  ..Usage Info $tab $brak(R):.quote stats R
+  ..Set Block list $tab $brak(S):.quote stats S
+  ..Shun list $tab $brak(s):.quote stats s
+  ..TLD Block list $tab $brak(t):.quote stats t
+  ..Traffic Info $tab $brak(T):.quote stats T
+  ..Uptime $tab $brak(u):.quote stats u  
+  ..U $+ $chr(58) $+ Line Block list $tab $brak(U):.quote stats U  
+  ..Deny Version list $tab $brak(v):.quote stats v 
+  ..vHost list $tab $brak(V):.quote stats V 
+  ..unLinked Servers $tab $brak(X):.quote stats X
+  ..Class Block list $tab $brak(Y):.quote stats Y
+  ..Ziplink Info $tab $brak(z):.quote stats z
+  ..Memory Info $tab $brak(Z):.quote stats Z
+  ;finish this http://www.unrealircd.com/files/docs/unreal32docs.html
+
+}
+
+menu nicklist {
+  $iif(($1 && $nget(ircdsupport) == unreal && ($me isop # || $me ishop #)),Mode)
+  .$iif(($nget(ircdsupport) == unreal && $iifelse($ncid(chanmode_ownerchar),~) isin $nick(#,$me).pnick && $iifelse($ncid(chanmode_ownerchar),~) !isin $nick(#,$1).pnick),Owner	+q) { mmode # + q $1-  }
+  .$iif(($nget(ircdsupport) == unreal && $iifelse($ncid(chanmode_ownerchar),~) isin $nick(#,$me).pnick && $iifelse($ncid(chanmode_ownerchar),~) isin $nick(#,$1).pnick),De-Owner	-q) { mmode # - q $1-  }
+  .$iif($nget(ircdsupport) == unreal,-)
+  .$iif(($nget(ircdsupport) == unreal && $iifelse($ncid(chanmode_ownerchar),~) isin $nick(#,$me).pnick && $iifelse($ncid(chanmode_adminchar),&) !isin $nick(#,$1).pnick),Admin	+a) { mmode # + a $1-  }
+  .$iif(($nget(ircdsupport) == unreal && $iifelse($ncid(chanmode_ownerchar),~) isin $nick(#,$me).pnick && $iifelse($ncid(chanmode_adminchar),&) isin $nick(#,$1).pnick),De-Admin	-a) { mmode # - a $1-  }
+
+  $iif($nget(ircdsupport) == unreal,-)
+  $iif(($1 && $nget(ircdsupport) == unreal),Services)
+  .$iif(($nget(ircdsupport) == unreal && a isincs $usermode),$style(2)  $tab  - Service Admin -) :!
+  .$iif(($nget(ircdsupport) == unreal && a isincs $usermode),Admin)
+  ..Join $cmdtip(sajoin):sajoin $$1 $$input(Which channels should I force ' $+ $1 $+ ' to join? [ $cr ] $+ ex: $+($chr(35) $+ chan1, $chr(44), $chr(35) $+ chan2) , e, Service Admin Force Join)
+  ..Part $cmdtip(sapart):sapart $$1 $$input(Which channels should I force ' $+ $1 $+ ' to part? [ $cr ] $+ ex: $+($chr(35) $+ chan1, $chr(44), $chr(35) $+ chan2) , e, Service Admin Force Part, $replace($remove($cwiget($1, chans),@,~,+),$chr(32),$chr(44)) )
+  ..-
+  ..Mode $cmdtip(samode):samode $$1 $$input(Set mode on $1 in #, e, Service Admin Force Mode)
+  ..svsNick $cmdtip(svsnick):operserv svsnick $1 $$input(What nickname shoukd $1 be changed to?,e)
+  ..svsKill $cmdtip(svskill):operserv svskill $1 $$input(Enter kill message,e)
+  .-
+  .$iif($nget(ircdsupport) == unreal,$style(2) $tab - Network Services -) :!
+
+  .ChanServ
+  ..test:!
+  $iif(($1 && $nget(ircdsupport) == unreal && ($me isop # || $me ishop #)),Bans)
+  .$style(2) - Unreal IRCD Bans  - :!
+  .Help
+  ..Unreal Bantypes:www http://www.unrealircd.com/files/docs/unreal32docs.html#feature_bantypes
+  .Silence Hostmask	~q:.echo -q $whilearray($snicks(#), 44, mmode # + b ~q:<match>, address.def).skipnull 
+  .Ban Nickchanges	~n:.echo -q $whilearray($snicks(#), 44, mmode # + b ~n:<match>, address.def).skipnull 
+  .Ban Realname	~r:mmode # +b ~r: $+ $$input(Which realname would you like to block from joining? [ $crlf ] [ $crlf ] ex: *hacker_bot_2000* [ $crlf ] [ $crlf ] note: underscore '_' matches both space ' ' and underscore. Wildcards are allowed,e,Ban Realname,$replace($cwiget($1,ircname),$chr(32),_))
+  .$iif($nget(ircdsupport) == unreal && $istok($ncid(server_supported),excepts,32),Exemption)
+  ..$style(2) - Unreal IRCD - :!
+  ..Help
+  ...Unreal Bantypes:www http://www.unrealircd.com/files/docs/unreal32docs.html#feature_bantypes
+  ..Exempt Registered Nick	~R:mode # +e ~R: $+ $1
+  ..Exempt Nickchanges	~n:.echo -q $whilearray($snicks(#), 44, iecho mmode # + e ~n:<match>, address.def).skipnull 
+  ..Exempt Realname	~r:mode # +e ~r: $+ $$input(Which realname would you like to block from joining? [ $crlf ] [ $crlf ] ex: *hacker_bot_2000* [ $crlf ] [ $crlf ] note: underscore '_' matches both space ' ' and underscore. Wildcards are allowed,e,Ban Realname,$replace($cwiget($1,ircname),$chr(32),_))
+  ..Exempt Channel	~c:iecho mode # +e ~c: $+ $$input(Enter the exempt channel to join here $crlf $crlf tip: status prefixes can also be used. ex: @#trusted for ops and higher $+ $chr(44) +#trusted for voices and higher $+ $chr(44) etc ,e)
+  ;  $iif($nget(ircdsupport) == unreal,-)
+}
+menu channel {
+  $iif($nget(ircdsupport) == unreal,Mode)
+  .$iif(!$nget(collapse.unrealmenu.channel/mode),$style(1)) - Unreal IRCD Modes -  {
+    var %q = $nget(collapse.unrealmenu.channel/mode)
+    nset collapse.unrealmenu.channel/mode $iif(!%q,on)
+    iecho $iif(%q, Expanded, Collapsed) Channel -> Mode -> Unreal IRCD Modes 
+  }
+  .$iif(!$nget(collapse.unrealmenu.channel/mode),Open Dialog $tab $cmdtip(unrealchan)) { unrealchan # }
+  ; 
+  .$sup.popcmode(#, A ,op umode;A, unreal, channel/mode, Only Admins join	+A).and { togglecmode # A  }
+  .$sup.popcmode(#, O, op  umode;o , unreal, channel/mode, Only ircOps join	+O).and { togglecmode # O }  
+  .$sup.popcmode(#, z, op, unreal, channel/mode, Only SSL join	+z) { togglecmode # z }  
+  .$sup.popcmode(#, R, op, unreal, channel/mode, Only Reg'd Join	+R) { togglecmode # R }  
+  .$sup.popcmode(#, M, op, unreal, channel/mode, Only Reg'd Speak	+M) { togglecmode # M }  
+  .$sup.popcmode(#, Q, op, unreal, channel/mode, Only Uline Kicks	+Q) { togglecmode # Q }  
+  .$sup.popcmode(#, c, op, unreal, channel/mode, No Colors	+c) { togglecmode # c }
+  .$sup.popcmode(#, C, op, unreal, channel/mode, No CTCPs	+C) { togglecmode # C }
+  .$sup.popcmode(#, V, op, unreal, channel/mode, No Invites	+V) { togglecmode # V }
+  .$sup.popcmode(#, K, op, unreal, channel/mode, No Invite Knock	+K) { togglecmode # K }
+  .$sup.popcmode(#, N, op, unreal, channel/mode, No Nick Changes	+N) { togglecmode # N }  
+  .$sup.popcmode(#, G, op, unreal, channel/mode, No Badwords	+G) { togglecmode # G }
+  .$sup.popcmode(#, T, op, unreal, channel/mode, No Notices	+T) { togglecmode # T }
+  .$sup.popcmode(#, f, op, unreal, channel/mode, Flood Protection	+f) { unreal.channelmodes.floodprot #  }
+  .$sup.popcmode(#, j, op, unreal, channel/mode, Join Throttling	+j) { if (j !isincs $chan(#).mode) { var %a = $$input(Allow this many different users to join in a time span,e,Throttle Joins - users $+ $chr(58) $+ time) | var %b = $$input(Allow ' $+ %a $+ ' users to join in this many seconds,e,Throttle Joins - users $+ $chr(58) $+ time) } | togglecmode # j %a $+ : $+ %b }
+  .$iif(l isincs $gettok($chan(#).mode,1,32), $sup.popcmode(#, L, owner, unreal, channel/mode, Chan Limit Redirect	+L $paren($chancid(#,unrealmode_L_chan)))) {  togglecmode # L $iif(L !isincs $chan(#).mode,$$input(If the channel user limit has been reached $+ $chr(44) send users to this alternate channel $+ $chr(58),e, Channel Limit Redirect, # $+ - $+ 2)) }
+  .$sup.popcmode(#, S, op, unreal, channel/mode, Strip Colors	+S) { togglecmode # S }
+  .$sup.popcmode(#, u, op, unreal, channel/mode, Auditorium	+u) { togglecmode # u }
+  .Help
+  ..Unreal IRCD Channel Modes : www http://www.unrealircd.com/files/docs/unreal32docs.html#userchannelmodes
+  $iif(($nget(ircdsupport) == unreal && ($me isop # || $me ishop #)),Bans)
+  .$style(2) - Unreal IRCD Bans  - :!
+  .Help
+  ..Unreal Bantypes:www http://www.unrealircd.com/files/docs/unreal32docs.html#feature_bantypes
+  .Silence Hostmask	~q:iecho mode # +b ~q: $+ $$input(Enter hostmask or nickname to silence in the channel,e)
+  .Ban Nickchanges	~n:iecho mode # +b ~n: $+ $$input(Enter hostmask or nickname to block from nick changes,e)
+  .Ban Channels	~c:iecho mode # +b ~c: $+ $$input(Enter the forbidden channel from joining here $crlf $crlf tip: status prefixes can also be used. ex: @#chan for ops $+ $chr(44) +#chan for voices $+ $chr(44) etc ,e)
+  .Ban Realname	~r:iecho mode # +b ~r: $+ $$input(Which realname would you like to block from joining? [ $crlf ] [ $crlf ] ex: *hacker_bot_2000* [ $crlf ] [ $crlf ] note: underscore '_' matches both space ' ' and underscore. Wildcards are allowed,e,Ban Realname,$replace($cwiget($1,ircname),$chr(32),_))
+  $iif(($nget(ircdsupport) == unreal && $svc.ispopupok($menutype)),Services)
+  .$iif(a isincs $usermode,ServiceAdmin)
+  ..saMode $cmdtip(samode) :sajoin # $$input(Set Channel Mode: [ $cr ] $+ ex: +stn, e, Service Admin Force Channel Mode, $iifelse($chan(#).mode,+) )
+
+}
+
+dialog unreal.klinelist {
+  title "New Project"
+  size -1 -1 184 146
+  option dbu
+}
+
+alias unreal.klinelist {
+  dlg unreal.klinelist
+  stats k
+}
+
+on *:DIALOG:unreal.klinelist:init:0:{
+  var %n = $dname
+  dcx Mark $dname ircnsetup.userlist_cb
+  xdialog -c %n 1 listview 2 1 365 255 report fullrow showsel  nolabelwrap tooltip tabstop
+  xdid -t $dname 1 $tab(+l 0 42 Flag, +c 0 126 Host, +l 0 74 Expires, +l 0 80 Set at, +l 0 82 Duration, +l 0 63 Set by, +l 0 152 Reason)
+
+}
+
+;these 2 raws might beable to go into ircn since most ircd might have 368 and 340 for userip
+;keep in mind though, userip might only be avail to ircops
+
+raw 340:*:{
+  if (($istok($ncid(server_CMDS),userip,44)) || ($nget(ircdsupport) == unreal)) {
+    var %a = $gettok($2,1,61)
+    var %u = $remove(%a,+,*)
+    if (*.IP iswmcs $gettok($2,2-,64)) return
+
+
+    if (!$cwiget(%u,cdns)) cwiset %u cdns $gettok($2,2-,64)
+
+  }
+}
+raw 223:*:{
+  if (!$dialog(unreal.klinelist)) return
+  var %n = unreal.klinelist
+
+  xdid -a %n 1 0 0 $tab(+ 0 0 0 0 0 0 $2, + 0 0 0 0 $3, + 0 0 0 0 $iif($4,$asctime($calc($4 + $ncid(server_time))),never), + 0 0 0 0 $asctime($calc($ncid(server_time) - $5)), + 0 0 0 0 $duration($calc($ncid(server_time) - $5)), + 0 0 0 0 $gettok($6,1,33) $paren($gettok($6,2-,33)), + 0 0 0 0 $nocolon($7-) )      
+}
+raw 216:*:{
+  if (!$dialog(unreal.klinelist)) return
+  var %n = unreal.klinelist
+
+  xdid -a %n 1 0 0 $tab(+ 0 0 0 0 0 0 $2, + 0 0 0 0  $3, + 0 0 0 0 $iif($4,$asctime($calc($4 + $ncid(server_time))),never), + 0 0 0 0 $asctime($calc($ncid(server_time) - $5)), + 0 0 0 0 $duration($calc($ncid(server_time) - $5)), + 0 0 0 0 $gettok($6,1,33) $paren($gettok($6,2-,33)), + 0 0 0 0 $nocolon($7-) )      
+}
+on *:SNOTICE:*Your vhost is now*:{
+  if ($nget(ircdsupport) == unreal) {
+
+    ncid vhost.host $6
+
+  }
+}
+on *:USERMODE:{
+  if ($nget(ircdsupport) == unreal) {
+    if (t isincs $1) {
+      if (t isincs $usermode) ncid vhost.enabled $true
+    }
+  }
+}
+on *:SIGNAL:loadircdsupport:{
+  scid $1
+  if ($nget(ircdsupport) == unreal) {
+    ncid chanmode_adminchar $iifelse($prefixmatch(a),&)
+    ncid chanmode_ownerchar $iifelse($prefixmatch(q),~)
+
+    ncid can_vhost $true
+    ncid can_dccallow $true
+    ncid can_silence $true
+    ncid show.ircdstatuswin $true
+    nset netservices.shownicklist $true
+  }
+  scid -r
+}
+on *:SIGNAL:unloadircdsupport:{
+  scid $1
+  if ($nget(ircdsupport) == unreal) {
+    ncid chanmode_adminchar 
+    ncid chanmode_ownerchar 
+    ncid can_vhost 
+    ncid can_dccallow
+    ncid can_silence 
+    ncid show.ircdstatuswin  
+    nset netservices.shownicklist 
+  }
+  scid -r
+}

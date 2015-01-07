@@ -1,0 +1,63 @@
+/*
+
+http://freenode.net/using_the_network.shtml
+
+
+*/
+
+alias -l ircdsvn.popcmode {
+  ; <chan> <mode> <require> <text>
+  ; checked = 1, disabled = 2, both = 3
+
+  if ($nget(collapse.ircdsevenmenu.channel/mode)) return 
+
+  if ($2 isincs $chanmodes) {
+    var %s = 1
+    if ($remove($3,-)) var %s = $popcmode.flags($1, $iif($prop == and,AND,OR), $3)
+    return $style($iif($2 isincs $gettok($chan($1).mode, 1,32), $iif(%s,1, 3) , $iif(!%s, 2) )) $4-
+  }
+}
+alias -l calleridmode return $iif($ncid(server_callerid) isalpha,$v1,g)
+on *:SIGNAL:umode_unknown:{
+  scid $1
+  if ($nget(ircdsupport) == ircdseven)  ncid umode_unknown $removecs($ncid(umode_unknown),+,$calleridmode,D,R,Q,Z)
+  scid -r
+}
+
+menu status  {
+  $iif($nget(ircdsupport) == ircdseven,Usermode)
+  .$iif(!$nget(collapse.ircdsevenmenu.status/umode),$style(1)) -  IRCd-Seven User Modes - {
+    var %q = $nget(collapse.ircdsevenmenu.status/umode)
+    nset collapse.ircdsevenmenu.status/umode $iif(!%q,on)
+    iecho $iif(%q, Expanded, Collapsed) Status -> Usermode ->  IRCd-Seven User Modes
+  }
+  .$iif($calleridmode !isincs $usermode,$sup.popumode($calleridmode,$null, ircdseven, status/umode, CallerID $tab + $+ $calleridmode)) { toggleumode $calleridmode }
+  .$iif($calleridmode isincs $usermode,$sup.popumode($calleridmode,$null, ircdseven, status/umode, CallerID $tab + $+ $calleridmode))  
+  ..$iif($calleridmode isincs $usermode, $style(1) Enabled) { toggleumode $calleridmode }
+  ..$iif($calleridmode isincs $usermode, -)
+  ..$iif($calleridmode isincs $usermode, CallerID Settings) { dlg ircn.service.callerid }
+  .$sup.popumode(D,$null, ircdseven, status/umode, Block Chantext	+D) { toggleumode D } 
+  .$sup.popumode(R,$null, ircdseven, status/umode, PrivMSG from Reg'd only	+R) { toggleumode R }
+  .$sup.popumode(Q,$null, ircdseven, status/umode, No Chan Fwding	+Q) { toggleumode Q }
+  .$sup.popumode(Z,Z,hide, ircdseven, status/umode, SSL Client	+Z) { }
+  .$iif(!$nget(collapse.ircdsevenmenu.status/umode), Help)
+  ..IRCd-Seven User Modes:www http://freenode.net/using_the_network.shtml#modes
+}
+
+
+menu channel {
+  $iif($nget(ircdsupport) == ircdseven,Mode)
+  .$iif(!$nget(collapse.ircdsevenmenu.channel/mode),$style(1)) -  IRCd-Seven Modes -  {
+    var %q = $nget(collapse.ircdsevenmenu.channel/mode)
+    nset collapse.ircdsevenmenu.channel/mode $iif(!%q,on)
+    iecho $iif(%q, Expanded, Collapsed) Channel -> Mode -> IRCd-Seven Modes 
+  }
+  .$sup.popcmode(#, c ,op, ircdseven, channel/mode, No Colors	+c) { togglecmode # c  }
+  .$sup.popcmode(#, C ,op, ircdseven, channel/mode, No CTCPs	+C) { togglecmode # C  }
+  .$sup.popcmode(#, f, op, ircdseven, channel/mode, Chan Forwarding	+f) { togglecmode # f } 
+  .$sup.popcmode(#, j, op, ircdseven, channel/mode, Join Throttling	+j) { if (j !isincs $chan(#).mode) { var %a = $$input(Allow this many different users to join in a time span,e,Throttle Joins - users $+ $chr(58) $+ time) | var %b = $$input(Allow ' $+ %a $+ ' users to join in this many seconds,e,Throttle Joins - users $+ $chr(58) $+ time) } | togglecmode # j %a $+ : $+ %b }
+  .$sup.popcmode(#, L, op, ircdseven, channel/mode, Extended Banlist	+L) { togglecmode # L }  
+  .$sup.popcmode(#, r, op, ircdseven, channel/mode, Only Reg'd Join	+r) { togglecmode # r }  
+  .$sup.popcmode(#, g, op, ircdseven, channel/mode, Anyone can Invite	+g) { togglecmode # g }  
+  .$sup.popcmode(#, P, op, ircdseven, channel/mode, Permanent Channel	+P) { togglecmode # P }  
+}

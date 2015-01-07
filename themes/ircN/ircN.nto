@@ -1,0 +1,41 @@
+[mts]
+ircN.AC 04
+ircN.HC 12
+ircN.SC 14
+CLineUserUL 14
+CLineBotUL 05
+CLineMasterUL 07
+CLineOwnerUL 03
+CLineOpUL 12
+CLineHopUL 02
+CLineVoiceUL 06
+CLineRegularUL 01
+CLineEnemyUL 04
+CLineMeUL 00
+CLineIrcOpUL 01
+iHelp.lc 5
+iHelp.line !script %:echo $alistfrmt($tab(12 $gettok(%::ihelpline,1,32),12 $gettok(%::ihelpline,2,32),12 $gettok(%::ihelpline,3,32),12 $gettok(%::ihelpline,4,32),12 $gettok(%::ihelpline,5,32))).line
+iHelp.main.top .-[iHelp]------------------------------------------------------------------.
+iHelp.main.bottom '------------------------------------------------------------------[iHelp]-'
+iHelp.cmd.top .-[iHelp]-------------------------------------------------------------------.
+iHelp.cmd.bottom '------------------------------------------------------------------[iHelp]-'
+Join !script %:echo *** %::nick $iif($mopt(0,2),$chr(40) $+ %::address $+ $chr(41)) has joined %::chan
+Part !script %:echo *** %::nick $iif($mopt(0,2),$chr(40) $+ %::address $+ $chr(41)) has left %::chan %::parentext
+Quit !script %:echo *** %::nick $iif($mopt(0,2),$chr(40) $+ %::address $+ $chr(41)) has left IRC %::parentext
+
+
+[Scheme1]
+CLineUserUL 14
+CLineBotUL 05
+CLineMasterUL 07
+CLineOwnerUL 03
+CLineOpUL 12
+CLineHopUL 02
+CLineVoiceUL 06
+CLineRegularUL 15
+CLineEnemyUL 04
+CLineMeUL 00
+CLineIrcOpUL 15
+
+[Scheme2]
+CLineMethod 2

@@ -1,0 +1,1 @@
+CMCDDE.exe "ircN" "command" "%*"

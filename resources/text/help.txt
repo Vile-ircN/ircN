@@ -1,0 +1,318 @@
+[mhelp]
+n=4
+n0=For masters:
+n1=$fix(1,) $fix(12,+user) $fix(12,+bot) $fix(12,+host) $fix(12,+chrec) chpass
+n2=$fix(1,) $fix(12,-user) $fix(12,-bot) $fix(12,-host) $fix(12,-chrec) chbotpass
+n3=$fix(1,) $fix(12,chattr) $fix(12,chinfo) $fix(12,boot) match
+
+[+user]
+n=5
+n0=$fix(4,###) +user <username> [hostmask [nickname [password]]]
+n1=$fix(4,) Adds a user to your userlist. If the user is not online, you
+n2=$fix(4,) must specify a hostmask to add, otherwise the user's hostmask
+n3=$fix(4,) will be determined from the given nickname.  If a nickname is
+n4=$fix(4,) supplied, "You have been added" notices will be sent to that nick.
+
+[+bot]
+n=5
+n0=$fix(4,###) +bot <username> [hostmask [botpass]]
+n1=$fix(4,) Adds a bot to your userlist. If the bot is not online, you
+n2=$fix(4,) must specify a hostmask to add, otherwise the bot's hostmask
+n3=$fix(4,) will be determined from the given nickname.  Attributes will be
+n4=$fix(4,) automatically set to +b.
+
+[+host]
+n=2
+n0=$fix(4,###) +host <username> <hostmask>
+n1=$fix(4,) Adds a hostmask to a user in the userlist.
+
+[+chrec]
+n=4
+n0=$fix(4,###) +chrec <username> <#channel>
+n1=$fix(4,) Adds a channel record for a given channel to a user in the userlist.
+n2=$fix(4,) This allows the user to set a channel-specific infoline in the
+n3=$fix(4,) given channel without requiring special flags in the channel.
+
+[chpass]
+n=3
+n0=$fix(4,###) chpass <username> [password]
+n1=$fix(4,) Changes a user's password used for obtaining ops in channels or
+n2=$fix(4,) accessing the partyline.  If no password is specified, it is cleared.
+
+[-user]
+n=2
+n0=$fix(4,###) -user <username>
+n1=$fix(4,) Removes a user from your userlist.
+
+[+bot]
+n=2
+n0=$fix(4,###) -bot <username>
+n1=$fix(4,) Removes a bot from your userlist.
+
+[-host]
+n=2
+n0=$fix(4,###) -host <username> <hostmask>
+n1=$fix(4,) Removes a hostmask from a user in the userlist.
+
+[-chrec]
+n=4
+n0=$fix(4,###) -chrec <username> <#channel>
+n1=$fix(4,) Removes a channel record for a given channel from a user in the userlist.
+n2=$fix(4,) This will remove any flags in the channel as well as any info-line
+n3=$fix(4,) set in that channel.
+
+[chbotpass]
+n=4
+n0=$fix(4,###) chbotpass <username> [password]
+n1=$fix(4,) Changes a user's bot password used for obtaining ops from that user/bot in
+n2=$fix(4,) channels or for logging into an eggdrop partyline.  If no password is specified,
+n3=$fix(4,) it is removed.
+
+[chattr]
+n=3
+n0=$fix(4,###) chattr <username> [flags [#channel]]
+n1=$fix(4,) Changes a user's flags in a given channel or changes global flags.
+n2=$fix(4,) Note that only owners may add/remove +n and +r.
+
+[chinfo]
+n=3
+n0=$fix(4,###) chinfo <username> [#channel] <infoline/none>
+n1=$fix(4,) Changes a user's info-line in a given channel or changes the user's global infoline.
+n2=$fix(4,) If "none" is specified for the infoline, it is removed.
+
+[boot]
+n=2
+n0=$fix(4,###) boot <username> [reason]
+n1=$fix(4,) Boots a user from the partyline for whatever given reason.
+
+[nhelp]
+n=3
+n0=For owners:
+n1=$fix(1,) $fix(12,+chan) $fix(12,jump) $fix(12,simul) $fix(12,save) die
+n2=$fix(1,) $fix(12,-chan) dump
+
+[+chan]
+n=2
+n0=$fix(4,###) +chan <channel>
+n1=$fix(4,) Adds a channel to autojoin and joins it.
+
+[jump]
+n=2
+n0=$fix(4,###) jump <server>
+n1=$fix(4,) Reconnects ircN to another IRC server.
+
+[simul]
+n=2
+n0=$fix(4,###) simul <user> <text>
+n1=$fix(4,) Simulates a given user typing something.
+
+[save]
+n=2
+n0=$fix(4,###) save
+n1=$fix(4,) Writes the user file and variables to disk.
+
+[die]
+n=2
+n0=$fix(4,###) die [reason]
+n1=$fix(4,) Shuts down ircN with the given reason, otherwise your username is used.
+
+[-chan]
+n=2
+n0=$fix(4,###) -chan <channel>
+n1=$fix(4,) Removes a channel to autojoin and parts it.
+
+[dump]
+n=2
+n0=$fix(4,###) dump <text>
+n1=$fix(4,) Sends text directly to the server, as /quote is used in other clients.
+
+[chelp]
+n=4
+n0=$fix(1,) $fix(12,whois) $fix(12,+ban) $fix(12,away) $fix(12,quit) chat
+n1=$fix(1,) $fix(12,whom) $fix(12,-ban) $fix(12,me) $fix(12,motd) echo
+n2=$fix(1,) $fix(12,info) $fix(12,bans) $fix(12,note) $fix(12,notes) timestamp
+n3=$fix(1,) $fix(12,files) $fix(12,newpass) $fix(12,su) remote
+
+[whois]
+n=9
+n0=$fix(4,###) whois <nickname>
+n1=$fix(4,) will show you the bot information about a user record. there are
+n2=$fix(4,) four headings:
+n3=$fix(9,) $fix(12,HANDLE) the handle (nickname) of the user
+n4=$fix(9,) $fix(12,PASS) "yes" if user has a password set, "no" if not
+n4=$fix(9,) $fix(12,BOTPASS) "yes" if user has a bot password set, "no" if not
+n5=$fix(9,) $fix(12,NOTES) the number of notes the user has waiting, currently N/A
+n6=$fix(9,) $fix(12,FLAGS) the flags the user has
+n7=$fix(9,) $fix(12,LAST) the last time the user was seen
+n8=$fix(9,) $fix(12,HOSTS) the hostmasks from which this user is recognized
+
+[+ban]
+n=3
+n0=$fix(4,###) +ban <hostmask> [#channels] [reason]
+n1=$fix(4,) Records a permanent ban in a given channel.  Note that you must have 
+n2=$fix(4,) +o in the given channel in order to add bans in that channel.
+
+[away]
+n=3
+n0=$fix(4,###) away [away-message]
+n1=$fix(4,) Marks you as "away" on the party line. your away message will
+n2=$fix(4,) show up in the '.whom' list. to set back type '.away' by itself.
+
+[quit]
+n=3
+n0=$fix(4,###) quit
+n1=$fix(4,) Removes you from the partyline and returns you to the interface menu.
+
+[chat]
+n=8
+n0=$fix(4,###) chat <channel # or name>
+n1=$fix(4,) Changes the channel on your telnet connection. When you first
+n2=$fix(4,) connect, you are placed on channel 0 (the party line).
+n3=$fix(4,) You can move to another channel where basically nobody can see
+n4=$fix(4,) you (except anyone else who decides to join that channel). Valid
+n5=$fix(4,) channel numbers are 1 thru 99999.
+
+[whom]
+n=4
+n0=$fix(4,###) whom
+n1=$fix(4,) will display a table of the users currently in the partyline.
+n2=$fix(4,) including handle, IP address, and current status (either away
+n3=$fix(4,) or idle)
+
+[-ban]
+n=3
+n0=$fix(4,###) -ban <hostmask>
+n1=$fix(4,) Removes a permanent ban from a given channel.  Note that you must have 
+n2=$fix(4,) +o in the channel specified in the ban in order to remove it.
+
+[me]
+n=2
+n0=$fix(4,###) me <action>
+n1=$fix(4,) Performs the given action in the partyline.
+
+[motd]
+n=2
+n0=$fix(4,###) motd
+n1=$fix(4,) Displays the MOTD
+
+[echo]
+n=5
+n0=$fix(4,###) echo <on/off>
+n1=$fix(4,) sets whether you want your messages echoed back to you. if it's
+n2=$fix(4,) on, then when you say something on the party line, it will be
+n3=$fix(4,) displayed to you just like everyone else will see it. if it's off,
+n4=$fix(4,) then that won't happen.
+
+[info]
+n=3
+n0=$fix(4,###) info [#channel] <infoline/none>
+n1=$fix(4,) Changes your info-line in a given channel or changes your global infoline.
+n2=$fix(4,) If "none" is specified for the infoline, it is removed.
+
+[bans]
+n=2
+n0=$fix(4,###) bans
+n1=$fix(4,) Displays all recorded bans.
+
+[note]
+n=3
+n0=$fix(4,###) note <user> <message>
+n1=$fix(4,) Sends a note to a given user. If the user is not on the partyline, it is
+n2=$fix(4,) recorded until the user reads and deletes it.  NOT YET IMPLEMENTED.
+
+[notes]
+n=3
+n0=$fix(4,###) notes <read/erase> [note #]
+n1=$fix(4,) Reads or erases the given note, or reads or erases all notes recorded for you.
+n2=$fix(4,) NOT YET IMPLEMENTED.
+
+[timestamp]
+n=3
+n0=$fix(4,###) timestamp <on/off>
+n1=$fix(4,) Sets whether you want your messages on the partyline to prefixed
+n2=$fix(4,) with my current time.
+
+[files]
+n=3
+n0=$fix(4,###) files
+n1=$fix(4,) Removes you from the partyline and sends you to the files area if you have
+n2=$fix(4,) files area access (flag +x).  NOT YET IMPLEMENTED.
+
+[newpass]
+n=2
+n0=$fix(4,###) newpass <password>
+n1=$fix(4,) Changes your password.
+
+[su]
+n=5
+n0=$fix(4,###) su <username>
+n1=$fix(4,) Switches you to another username in the partyline, provided that that user
+n2=$fix(4,) is not already in the partyline and that that user has a password set.
+n3=$fix(4,) If you are an owner and the specified user is not an owner, no password
+n4=$fix(4,) is required.
+
+[remote]
+n=3
+n0=$fix(4,###) remote
+n1=$fix(4,) Removes you from the partyline and sends you to the remote control interface
+n2=$fix(4,) if you have remote control access (flag +r).
+
+[match]
+n=28
+n0=$fix(4,###) match <attr> [channel] [[start] limit]
+n1=$fix(3,) shows you user records with the attributes requested: 
+n2=$fix(3,) <attr> is of the form:  <+/-><global>[&/|<channel>[&/|<bot>]]
+n3=$fix(4,) specifying & as the speperator, will cause AND style matching,
+n4=$fix(4,) | will cause OR style matching, channel flags are match vs
+n5=$fix(4,) the specified channel (or your console channel), and bot
+n6=$fix(4,) is match vs the sepreate bot flags.
+n7=$fix(4,) some examples:
+n8=$fix(7,) .match +o     will match any GLOBAL +o's
+n9=$fix(7,) .match -o&+o  will match anyone without a global +o AND 
+n10=$fix(15,) with a channel +o on your console channel
+n11=$fix(7,) .match +f|+f  will match anyone with a global +f or a
+n12=$fix(15,) channel +f on your console channel
+n13=$fix(7,) .match |f #fred will match anyone with +f on channel #fred
+n14=$fix(4,###) match <wildcard-string> [[start] limit]
+n15=$fix(3,) shows you user records where the nickname or any of the hostmasks
+n16=$fix(3,) match the wildcard string shown.
+n17=
+n18=$fix(3,) the default limit is 20, meaning that if more than 20 user records
+n19=$fix(3,) match your requirements, only the first 20 will be shown.  you can
+n20=$fix(3,) change this limit by specifying one on the command line, though.
+n21=$fix(3,) if you include a limit, you may also include a starting place (the
+n22=$fix(3,) default is 1).  for example, to list the first 15 users who have
+n23=$fix(3,) hostmasks from clemson.edu:
+n24=$fix(7,) .match *clemson.edu 15
+n25=$fix(3,) to get the next 10 (if there are more than 15), you ask to list
+n26=$fix(3,) numbers 16 thru 25:
+n27=$fix(7,) .match *clemson.edu 16 25
+
+[console]
+n=26
+n0=$fix(4,###) console [channel] [modes]
+n1=$fix(3,) Changes your console level, so that you will see only those types
+n2=$fix(3,) of console messages that you want to.  Your current console channel
+n3=$fix(3,) is the channel (that the bot is on) which you can view from the
+n4=$fix(3,) party line, and which channel-specific commands (like 'say' and
+n5=$fix(3,) 'op') take affect on.  valid levels are:
+n6=$fix(6,) m  display private msgs/ctcps to the bot
+n7=$fix(6,) p  display public talk and ctcps on the channel
+n8=$fix(6,) k  display kicks/bans/mode changes on the channel
+n9=$fix(6,) j  display joins/parts/nick changes/signoffs/etc on the channel
+n10=$fix(6,) b  display bot links/unlinks/userfile-sharing
+n11=$fix(6,) s  display server messages and connect/disconnects
+n12=$fix(6,) w  display msgs between IRCops (wallops)
+n13=$fix(3,) channel master only:
+n14=$fix(6,) c  display user commands (dcc and msg)
+n15=$fix(6,) o  display other bot notices [HIGHLY RECOMMENDED]
+n16=$fix(3,) master only:
+n17=$fix(6,) x  display file transfers and file-area commands
+n18=$fix(6,) d  display debug messages that only coders would care about
+n19=$fix(3,) The mode can also be a modifier like '+p' or '-jk' or '+mp-b'.  If
+n20=$fix(3,) you omit the channel and modes, it will show your current console
+n21=$fix(3,) channel and setting.
+n22=$fix(4,###) console <user> [channel] [modes]
+n23=$fix(3,) Is used to set the console level of another user.  This can even
+n24=$fix(3,) be used on users who normally would not be able to set their own
+n25=$fix(3,) console mode.
