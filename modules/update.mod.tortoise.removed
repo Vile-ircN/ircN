@@ -1,6 +1,0 @@
-[module]
-module=Update System
-version=8.0
-author=ircN Development Team
-script1=update.mrc
-depmod=http.mod
