@@ -1,0 +1,661 @@
+$iif($chan,$tab - $shorttext(25,$chan) - ) : .timer 1 0 channel #
+-
+$iif($ismod(classicui),&Settings) { chansettings }
+$iif($ismod(classicui),&Display) { chandisplay }
+-
+Settings
+.$style(2) $tab - Channel Settings -:return
+.Autocycle empty chan
+..$style(2) - $chan -:return
+..$toggled($iif($changet($chan,autocycle) == off,on)) Disabled:chanset $chan autocycle off
+..$toggled($iif($changet($chan,autocycle) == on,on)) Enabled:chanset $chan autocycle on
+..$toggled($iif(!$changet($chan,autocycle),on)) Default:chanset $chan autocycle
+..-
+..$style(2) - $ncid(network.hash) -:return
+..$toggled($iif($changet(global,autocycle) == off,on)) Disabled:chanset global autocycle off
+..$toggled($iif($changet(global,autocycle) == on,on)) Enabled:chanset global autocycle on
+..$toggled($iif(!$changet(global,autocycle),on)) Default:chanset global autocycle
+..-
+..$style(2) - Global -:return
+..$toggled($nvar(autocycle)) Enabled:nvartog autocycle
+.Kick on ban
+..$style(2) - $chan - :return
+..$toggled($iif($changet($chan,kickonban) == off,on)) Disabled:chanset $chan kickonban off
+..$toggled($iif($changet($chan,kickonban) == on,on)) Enabled:chanset $chan kickonban on
+..$toggled($iif(!$changet($chan,kickonban),on)) Default:chanset $chan kickonban
+..-
+..$style(2) - $ncid(network.hash) - :return
+..$toggled($iif($changet(global,kickonban) == off,on)) Disabled:chanset global kickonban off
+..$toggled($iif($changet(global,kickonban) == on,on)) Enabled:chanset global kickonban on
+..$toggled($iif(!$changet(global,kickonban),on)) Default:chanset global kickonban
+..-
+..$style(2) - Global -:return
+..$toggled($nvar(kickonban)) Enabled:nvartog kickonban
+.Clear bans on join
+..$style(2) - $chan -:return
+..$toggled($iif($changet($chan,clearbans) == off,on)) Disabled:chanset $chan clearbans off
+..$toggled($iif($changet($chan,clearbans) == on,on)) Enabled:chanset $chan clearbans on
+..$toggled($iif(!$changet($chan,clearbans),on)) Default:chanset $chan clearbans
+..-
+..$style(2) - $ncid(network.hash) -:return
+..$toggled($iif($changet(global,clearbans) == off,on)) Disabled:chanset global clearbans off
+..$toggled($iif($changet(global,clearbans) == on,on)) Enabled:chanset global clearbans on
+..$toggled($iif(!$changet(global,clearbans),on)) Default:chanset global clearbans
+..-
+..$style(2) - Global -:return
+..$toggled($nvar(clearbans)) Enabled:nvartog clearbans
+.Set mode on join
+..$style(2) - $chan - :return
+..$toggled($iif($changet($chan,setmodeonjoin) == off,on)) Disabled:chanset $chan setmodeonjoin off
+..$toggled($iif($changet($chan,setmodeonjoin) == on,on)) Enabled:chanset $chan setmodeonjoin on
+..$toggled($iif(!$changet($chan,setmodeonjoin),on)) Default:chanset $chan setmodeonjoin
+..Set Mode $+ $chr(58) $tab $paren($iifelse($changet($chan,onjoinmode),______),[,]):chanset $chan onjoinmode $input(What mode to set? $paren(Leave empty for default) $+ $crlf $+ $paren(ie. +stn),e,Onjoin Mode,$changet($chan,onjoinmode))
+..-
+..$style(2) - $ncid(network.hash) -:return
+..$toggled($iif($changet(global,setmodeonjoin) == off,on)) Disabled:chanset global setmodeonjoin off
+..$toggled($iif($changet(global,setmodeonjoin) == on,on)) Enabled:chanset global setmodeonjoin on
+..$toggled($iif(!$changet(global,setmodeonjoin),on)) Default:chanset global setmodeonjoin
+..Set Mode $+ $chr(58) $tab $paren($iifelse($changet(global,onjoinmode),______),[,]):chanset global onjoinmode $input(What mode to set? $paren(Leave empty for default) $+ $crlf $+ $paren(ie. +stn),e,Onjoin Mode,$changet(global,onjoinmode))
+..-
+..$style(2) - Global -:return
+..$toggled($nvar(setmodeonjoin)) Enabled:nvartog setmodeonjoin
+..Set Mode $+ $chr(58) $tab $paren($iifelse($nvar(onjoinmode),______),[,]) :{ nvar onjoinmode $input(What mode to set? $+ $crlf $+ $paren(ie. +stn, empty or cancel for off),e,Onjoin Mode,$nvar(onjoinmode)) | nvar setonjoinmode $iif($nvar(onjoinmode),on) }
+.Hold mode
+..$style(2) - $chan -:return
+..$toggled($iif($changet($chan,holdmode) != on,on)) Disabled:chanset $chan holdmode off
+..$toggled($iif($changet($chan,holdmode) == on,on)) Enabled:chanset $chan holdmode on
+..Set Mode $+ $chr(58) $tab $paren($iifelse($changet($chan,$tab(holdmode,mode)),______),[,]):chanset $chan $tab(holdmode,mode)  $$input(What mode to hold? $+ $crlf $+ $paren(ie. +stn),e,Hold Mode,$changet($chan,$tab(holdmode,mode)))
+.Voice all users
+..$style(2) - $chan -:return
+..$toggled($iif($changet($chan,voiceall) == off,on)) Disabled:chanset $chan voiceall off
+..$toggled($iif($changet($chan,voiceall) == on,on)) Enabled:chanset $chan voiceall on
+..$toggled($iif(!$changet($chan,voiceall),on)) Default:chanset $chan voiceall
+..-
+..$style(2) - $ncid(network.hash) -:return
+..$toggled($iif($changet(global,voiceall) == off,on)) Disabled:chanset global voiceall off
+..$toggled($iif($changet(global,voiceall) == on,on)) Enabled:chanset global voiceall on
+..$toggled($iif(!$changet(global,voiceall),on)) Default:chanset global voiceall
+..-
+..$style(2) - Global -:return
+..$toggled($nvar(voiceall)) Enabled:nvartog voiceall
+.Auto set topic
+..$style(2) - $chan -:return
+..$toggled($iif($changet($chan,autosettopic) != on,on)) Disabled:chanset $chan autosettopic
+..$toggled($iif($changet($chan,autosettopic) == on,on)) Enabled { chanset $chan autosettopic on | if ($changet($chan,$tab(autosettopic,topic))) { topic # $ifmatch } }
+..-
+..Set Topic $iif($changet($chan,$tab(autosettopic,topic)),$paren($shorttext(20,$ifmatch))):{ chanset $chan $tab(autosettopic,topic) $$input(What topic to set on join? $+ $crlf $+ $paren(ex $+ $chr(58) welcome to # ),e,Auto set channel topic,$changet($chan,$tab(autosettopic,topic))) }
+.Hold topic
+..$style(2) - $chan -:return
+..$toggled($iif($changet($chan,holdtopic) != on,on)) Disabled:chanset $chan holdtopic
+..$toggled($iif($changet($chan,holdtopic) == on,on)) Enabled { chanset $chan holdtopic on |  if ($changet($chan,$tab(holdtopic,topic))) { topic # $ifmatch } }
+..-
+..Set Topic $iif($changet($chan,$tab(holdtopic,topic)),$chr(40) $+ $shorttext(20,$ifmatch) $+ $chr(41)):{ chanset $chan $tab(holdtopic,topic) $$input(What do you want to hold? $crlf $paren(Hold will re-set the topic when it is changed),e,Topic Hold,$tab(holdtopic,topic))  }
+.Internal Address List
+..$style(2) - $chan -:return
+..$toggled($iif($changet($chan,ial) == off,on)) Disabled:chanset $chan ial off
+..$toggled($iif($changet($chan,ial) == on,on)) Enabled:chanset $chan ial on
+..$toggled($iif(!$changet($chan,ial),on)) Default:chanset $chan ial
+..-
+..$style(2) - $ncid(network.hash) -:return
+..$toggled($iif($changet(global,ial) == off,on)) Disabled:chanset global ial off
+..$toggled($iif($changet(global,ial) == on,on)) Enabled:chanset global ial on
+..$toggled($iif(!$changet(global,ial),on)) Default:chanset global ial
+..-
+..$style(2) - Global -:return
+..$iif($nvar(ial) != off,$style(1) Enabled):nvartog ial
+.Edit perform onjoin...:onjoin
+.-
+.$style(2) $tab - Channel Display - :!
+.Nicklist colors
+..Set Colors $cmdtip(nickcol): nickcol
+..-
+..$style(2) - Style - :!
+..$toggled($iif($nvar(colnick) != on,on)) Disabled/User defined:colnick off
+..$toggled($iif($nvar(colul) && $nvar(colnick) == on,on)) Userlist style:{ nvar colul on | colnick on }
+..$toggled($iif($nvar(colul) != on && $nvar(colnick) == on,on)) Theme style:{ nvar colul | colnick on }
+.Nickname chat colors
+..$style(2) - $chan - :return
+.Strip Color codes
+..$style(2) - $chan - :return
+..$toggled($iif($changet($chan,stripcodes) == off,on)) Disabled:chanset $chan stripcodes off
+..$toggled($iif($changet($chan,stripcodes) == on,on)) Enabled:chanset $chan stripcodes on
+..$toggled($iif(!$changet($chan,stripcodes),on)) Default:chanset $chan stripcodes
+..-
+..$style(2) - $ncid(network.hash) - :return
+..$toggled($iif($changet(global,stripcodes) == off,on)) Disabled:chanset global stripcodes on
+..$toggled($iif($changet(global,stripcodes) == on,on)) Enabled:chanset global stripcodes off
+..$toggled($iif(!$changet(global,stripcodes),on)) Default:chanset global stripcodes
+..-
+..$style(2) - Global - :return
+..$toggled($nvar(stripcodes)) Enabled:nvartog stripcodes
+.Show Clones on-join
+..$style(2) - $chan - :return
+..$toggled($iif($changet($chan,onjoin.showclones) == off,on)) Disabled:chanset $chan onjoin.showclones off
+..$toggled($iif($changet($chan,onjoin.showclones) == on,on)) Enabled:chanset $chan onjoin.showclones on
+..$toggled($iif(!$changet($chan,onjoin.showclones),on)) Default:chanset $chan onjoin.showclones
+..-
+..$style(2) - $ncid(network.hash) - :return
+..$toggled($iif($changet(global,onjoin.showclones) == off,on)) Disabled:chanset global onjoin.showclones on
+..$toggled($iif($changet(global,onjoin.showclones) == on,on)) Enabled:chanset global onjoin.showclones off
+..$toggled($iif(!$changet(global,onjoin.showclones),on)) Default:chanset global onjoin.showclones
+..-
+..$style(2) - Global - :return
+..$toggled($nvar(onjoin.showclones)) Enabled:nvartog onjoin.showclones
+.Netsplit detector
+..$style(2) - $chan - :return
+..$toggled($iif($changet($chan,netsplit) == off,on)) Disabled:chanset $chan netsplit off
+..$toggled($iif($changet($chan,netsplit) == on,on)) Enabled:chanset $chan netsplit on
+..$toggled($iif(!$changet($chan,netsplit),on)) Default:chanset $chan netsplit
+..-
+..$style(2) - $ncid(network.hash) - :return
+..$toggled($iif($changet(global,netsplit) == off,on)) Disabled:chanset global netsplit off
+..$toggled($iif($changet(global,netsplit) == on,on)) Enabled:chanset global netsplit on
+..$toggled($iif(!$changet(global,netsplit),on)) Default:chanset global netsplit
+..-
+..$style(2) - Global - :return
+..$toggled($nvar(netsplit)) Enabled:nvartog netsplit
+.Don't highlight switchbar on activity
+..$style(2) - $chan - :return
+..$toggled($iif($changet($chan,nohighlightmessage) == off,on)) Disabled:chanset $chan nohighlightmessage off
+..$toggled($iif($changet($chan,nohighlightmessage) == on,on)) Enabled:chanset $chan nohighlightmessage on
+..$toggled($iif(!$changet($chan,nohighlightmessage),on)) Default:chanset $chan nohighlightmessage
+..-
+..$style(2) - $ncid(network.hash) - :return
+..$toggled($iif($changet(global,nohighlightmessage) == off,on)) Disabled:chanset global nohighlightmessage off
+..$toggled($iif($changet(global,nohighlightmessage) == on,on)) Enabled:chanset global nohighlightmessage on
+..$toggled($iif(!$changet(global,nohighlightmessage),on)) Default:chanset global nohighlightmessage
+..-
+..$style(2) - Global - :return
+..$toggled($nvar(nohighlightmessage)) Enabled:nvartog nohighlightmessage
+.Ignore highlight annoyance
+..$style(2) - $chan - :return
+..$toggled($iif($changet($chan,highlightblockannoy) == off,on)) Disabled:chanset $chan highlightblockannoy off
+..$toggled($iif($changet($chan,highlightblockannoy) == on,on)) Enabled:chanset $chan highlightblockannoy on
+..$toggled($iif(!$changet($chan,highlightblockannoy),on)) Default:chanset $chan highlightblockannoy 
+..-
+..$style(2) - $ncid(network.hash) - :return
+..$toggled($iif($changet(global,highlightblockannoy) == off,on)) Disabled:chanset global highlightblockannoy off
+..$toggled($iif($changet(global,highlightblockannoy) == on,on)) Enabled:chanset global highlightblockannoy on
+..$toggled($iif(!$changet(global,highlightblockannoy),on)) Default:chanset global highlightblockannoy 
+..-
+..$style(2) - Global - :return
+..$toggled($nvar(highlightblockannoy)) Enabled:nvartog highlightblockannoy 
+.Separated Text Spacing
+..$style(2) - $chan - :return
+..$toggled($iif($changet($chan,linesep.samenick) == off,on)) Disabled:chanset $chan linesep.samenick off
+..$toggled($iif($changet($chan,linesep.samenick) == on,on)) Enabled:chanset $chan linesep.samenick on
+..$toggled($iif(!$changet($chan,linesep.samenick),on)) Default:chanset $chan linesep.samenick
+..-
+..$style(2) - $ncid(network.hash) - :return
+..$toggled($iif($changet(global,linesep.samenick) == off,on)) Disabled:chanset global linesep.samenick off
+..$toggled($iif($changet(global,linesep.samenick) == on,on)) Enabled:chanset global linesep.samenick on
+..$toggled($iif(!$changet(global,linesep.samenick),on)) Default:chanset global linesep.samenick
+..-
+..$style(2) - Global - :return
+..$toggled($nvar(linesep.samenick)) Enabled:nvartog linesep.samenick
+..Line seperator $paren(blank line):!
+.Text filtering:{ chandisplay | .timer 1 0 did -c ircn.chandisplay 40 }
+.$iif($highlight,Highlight filtering) : $iif($highlight(0),dlg ircn.chanhighlightfilter,iecho Add some highlights first with /highlight)
+.Change my text style... { chandisplay | .timer 1 0 did -c ircn.chandisplay 42 }
+.-
+.$style(2) $tab - Event Filtering - :!
+.Text
+..$style(2) - $chan -:return
+..$toggled($iif($changet($chan,chanevent.text) == hide,on)) Hide: chanset $chan chanevent.text $iif($changet($chan,chanevent.text) != hide,hide)
+..$toggled($iif($changet($chan,chanevent.text) == status,on)) Status:chanset $chan chanevent.text  $iif($changet($chan,chanevent.text) != status,status)
+..$toggled($iif($changet($chan,chanevent.text) == channel,on)) Channel:chanset $chan chanevent.text  $iif($changet($chan,chanevent.text) != channel,channel)
+..$toggled($iif(!$changet($chan,chanevent.text),on)) Default:chanset $chan chanevent.text
+..-
+..$style(2) - $ncid(network.hash) -:return
+..$toggled($iif($changet(global,chanevent.text) == hide,on)) Hide: chanset global chanevent.text $iif($changet(global,chanevent.text) != hide,hide)
+..$toggled($iif($changet(global,chanevent.text) == status,on)) Status:chanset global chanevent.text  $iif($changet(global,chanevent.text) != status,status)
+..$toggled($iif($changet(global,chanevent.text) == channel,on)) Channel:chanset global chanevent.text  $iif($changet(global,chanevent.text) != channel,channel)
+..$toggled($iif(!$changet(global,chanevent.text),on)) Default:chanset global chanevent.text
+..-
+..$style(2) - Global -:return
+..$toggled($iif($nvar(chanevent.text) == hide,on)) Hide:nvar chanevent.text $iif($nvar(chanevent.text) != hide,hide)
+..$toggled($iif($nvar(chanevent.text) == status,on)) Status:nvar chanevent.text $iif($nvar(chanevent.text) != status,status)
+..$toggled($iif($nvar(chanevent.text) == channel,on)) Channel:nvar kickonban $iif($nvar(chanevent.text) != channel,channel)
+..$toggled($iif(!$nvar(chanevent.text),on)) Default:nvar chanevent.text
+.Actions
+..$style(2) - $chan -:return
+..$toggled($iif($changet($chan,chanevent.action) == hide,on)) Hide: chanset $chan chanevent.action $iif($changet($chan,chanevent.action) != hide,hide)
+..$toggled($iif($changet($chan,chanevent.action) == status,on)) Status:chanset $chan chanevent.action  $iif($changet($chan,chanevent.action) != status,status)
+..$toggled($iif($changet($chan,chanevent.action) == channel,on)) Channel:chanset $chan chanevent.action  $iif($changet($chan,chanevent.action) != channel,channel)
+..$toggled($iif(!$changet($chan,chanevent.action),on)) Default:chanset $chan chanevent.action
+..-
+..$style(2) - $ncid(network.hash) -:return
+..$toggled($iif($changet(global,chanevent.action) == hide,on)) Hide: chanset global chanevent.action $iif($changet(global,chanevent.action) != hide,hide)
+..$toggled($iif($changet(global,chanevent.action) == status,on)) Status:chanset global chanevent.action  $iif($changet(global,chanevent.action) != status,status)
+..$toggled($iif($changet(global,chanevent.action) == channel,on)) Channel:chanset global chanevent.action  $iif($changet(global,chanevent.action) != channel,channel)
+..$toggled($iif(!$changet(global,chanevent.action),on)) Default:chanset global chanevent.action
+..-
+..$style(2) - Global -:return
+..$toggled($iif($nvar(chanevent.action) == hide,on)) Hide:nvar chanevent.action $iif($nvar(chanevent.action) != hide,hide)
+..$toggled($iif($nvar(chanevent.action) == status,on)) Status:nvar chanevent.action $iif($nvar(chanevent.action) != status,status)
+..$toggled($iif($nvar(chanevent.action) == channel,on)) Channel:nvar kickonban $iif($nvar(chanevent.action) != channel,channel)
+..$toggled($iif(!$nvar(chanevent.action),on)) Default:nvar chanevent.action
+.Joins
+..$style(2) - $chan -:return
+..$toggled($iif($changet($chan,chanevent.join) == hide,on)) Hide: chanset $chan chanevent.join $iif($changet($chan,chanevent.join) != hide,hide)
+..$toggled($iif($changet($chan,chanevent.join) == status,on)) Status:chanset $chan chanevent.join  $iif($changet($chan,chanevent.join) != status,status)
+..$toggled($iif($changet($chan,chanevent.join) == channel,on)) Channel:chanset $chan chanevent.join  $iif($changet($chan,chanevent.join) != channel,channel)
+..$toggled($iif(!$changet($chan,chanevent.join),on)) Default:chanset $chan chanevent.join
+..-
+..$style(2) - $ncid(network.hash) -:return
+..$toggled($iif($changet(global,chanevent.join) == hide,on)) Hide: chanset global chanevent.join $iif($changet(global,chanevent.join) != hide,hide)
+..$toggled($iif($changet(global,chanevent.join) == status,on)) Status:chanset global chanevent.join  $iif($changet(global,chanevent.join) != status,status)
+..$toggled($iif($changet(global,chanevent.join) == channel,on)) Channel:chanset global chanevent.join  $iif($changet(global,chanevent.join) != channel,channel)
+..$toggled($iif(!$changet(global,chanevent.join),on)) Default:chanset global chanevent.join
+..-
+..$style(2) - Global - :return
+..$toggled($iif($nvar(chanevent.join) == hide,on)) Hide:nvar chanevent.join $iif($nvar(chanevent.join) != hide,hide)
+..$toggled($iif($nvar(chanevent.join) == status,on)) Status:nvar chanevent.join $iif($nvar(chanevent.join) != status,status)
+..$toggled($iif($nvar(chanevent.join) == channel,on)) Channel:nvar kickonban $iif($nvar(chanevent.join) != channel,channel)
+..$toggled($iif(!$nvar(chanevent.join),on)) Default:nvar chanevent.join
+.Parts
+..$style(2)  - $chan - :return
+..$toggled($iif($changet($chan,chanevent.part) == hide,on)) Hide: chanset $chan chanevent.part $iif($changet($chan,chanevent.part) != hide,hide)
+..$toggled($iif($changet($chan,chanevent.part) == status,on)) Status:chanset $chan chanevent.part  $iif($changet($chan,chanevent.part) != status,status)
+..$toggled($iif($changet($chan,chanevent.part) == channel,on)) Channel:chanset $chan chanevent.part  $iif($changet($chan,chanevent.part) != channel,channel)
+..$toggled($iif(!$changet($chan,chanevent.part),on)) Default:chanset $chan chanevent.part
+..-
+..$style(2) - $ncid(network.hash) - :return
+..$toggled($iif($changet(global,chanevent.part) == hide,on)) Hide: chanset global chanevent.part $iif($changet(global,chanevent.part) != hide,hide)
+..$toggled($iif($changet(global,chanevent.part) == status,on)) Status:chanset global chanevent.part  $iif($changet(global,chanevent.part) != status,status)
+..$toggled($iif($changet(global,chanevent.part) == channel,on)) Channel:chanset global chanevent.part  $iif($changet(global,chanevent.part) != channel,channel)
+..$toggled($iif(!$changet(global,chanevent.part),on)) Default:chanset global chanevent.part
+..-
+..$style(2) - Global - :return
+..$toggled($iif($nvar(chanevent.part) == hide,on)) Hide:nvar chanevent.part $iif($nvar(chanevent.part) != hide,hide)
+..$toggled($iif($nvar(chanevent.part) == status,on)) Status:nvar chanevent.part $iif($nvar(chanevent.part) != status,status)
+..$toggled($iif($nvar(chanevent.part) == channel,on)) Channel:nvar kickonban $iif($nvar(chanevent.part) != channel,channel)
+..$toggled($iif(!$nvar(chanevent.part),on)) Default:nvar chanevent.part
+.Quits
+..$style(2) - $chan - :return
+..$toggled($iif($changet($chan,chanevent.quit) == hide,on)) Hide: chanset $chan chanevent.quit $iif($changet($chan,chanevent.quit) != hide,hide)
+..$toggled($iif($changet($chan,chanevent.quit) == status,on)) Status:chanset $chan chanevent.quit  $iif($changet($chan,chanevent.quit) != status,status)
+..$toggled($iif($changet($chan,chanevent.quit) == channel,on)) Channel:chanset $chan chanevent.quit  $iif($changet($chan,chanevent.quit) != channel,channel)
+..$toggled($iif(!$changet($chan,chanevent.quit),on)) Default:chanset $chan chanevent.quit
+..-
+..$style(2) - $ncid(network.hash) - :return
+..$toggled($iif($changet(global,chanevent.quit) == hide,on)) Hide: chanset global chanevent.quit $iif($changet(global,chanevent.quit) != hide,hide)
+..$toggled($iif($changet(global,chanevent.quit) == status,on)) Status:chanset global chanevent.quit  $iif($changet(global,chanevent.quit) != status,status)
+..$toggled($iif($changet(global,chanevent.quit) == channel,on)) Channel:chanset global chanevent.quit  $iif($changet(global,chanevent.quit) != channel,channel)
+..$toggled($iif(!$changet(global,chanevent.quit),on)) Default:chanset global chanevent.quit
+..-
+..$style(2) - Global - :return
+..$toggled($iif($nvar(chanevent.quit) == hide,on)) Hide:nvar chanevent.quit $iif($nvar(chanevent.quit) != hide,hide)
+..$toggled($iif($nvar(chanevent.quit) == status,on)) Status:nvar chanevent.quit $iif($nvar(chanevent.quit) != status,status)
+..$toggled($iif($nvar(chanevent.quit) == channel,on)) Channel:nvar kickonban $iif($nvar(chanevent.quit) != channel,channel)
+..$toggled($iif(!$nvar(chanevent.quit),on)) Default:nvar chanevent.quit
+.Modes
+..$style(2) - $chan - :return
+..$toggled($iif($changet($chan,chanevent.mode) == hide,on)) Hide: chanset $chan chanevent.mode $iif($changet($chan,chanevent.mode) != hide,hide)
+..$toggled($iif($changet($chan,chanevent.mode) == status,on)) Status:chanset $chan chanevent.mode  $iif($changet($chan,chanevent.mode) != status,status)
+..$toggled($iif($changet($chan,chanevent.mode) == channel,on)) Channel:chanset $chan chanevent.mode  $iif($changet($chan,chanevent.mode) != channel,channel)
+..$toggled($iif(!$changet($chan,chanevent.mode),on)) Default:chanset $chan chanevent.mode
+..-
+..$style(2) - $ncid(network.hash) - :return
+..$toggled($iif($changet(global,chanevent.mode) == hide,on)) Hide: chanset global chanevent.mode $iif($changet(global,chanevent.mode) != hide,hide)
+..$toggled($iif($changet(global,chanevent.mode) == status,on)) Status:chanset global chanevent.mode  $iif($changet(global,chanevent.mode) != status,status)
+..$toggled($iif($changet(global,chanevent.mode) == channel,on)) Channel:chanset global chanevent.mode  $iif($changet(global,chanevent.mode) != channel,channel)
+..$toggled($iif(!$changet(global,chanevent.mode),on)) Default:chanset global chanevent.mode
+..-
+..$style(2) - Global - :return
+..$toggled($iif($nvar(chanevent.mode) == hide,on)) Hide:nvar chanevent.mode $iif($nvar(chanevent.mode) != hide,hide)
+..$toggled($iif($nvar(chanevent.mode) == status,on)) Status:nvar chanevent.mode $iif($nvar(chanevent.mode) != status,status)
+..$toggled($iif($nvar(chanevent.mode) == channel,on)) Channel:nvar kickonban $iif($nvar(chanevent.mode) != channel,channel)
+..$toggled($iif(!$nvar(chanevent.mode),on)) Default:nvar chanevent.mode
+.Topics
+..$style(2) - $chan - :return
+..$toggled($iif($changet($chan,chanevent.topic) == hide,on)) Hide: chanset $chan chanevent.topic $iif($changet($chan,chanevent.topic) != hide,hide)
+..$toggled($iif($changet($chan,chanevent.topic) == status,on)) Status:chanset $chan chanevent.topic  $iif($changet($chan,chanevent.topic) != status,status)
+..$toggled($iif($changet($chan,chanevent.topic) == channel,on)) Channel:chanset $chan chanevent.topic  $iif($changet($chan,chanevent.topic) != channel,channel)
+..$toggled($iif(!$changet($chan,chanevent.topic),on)) Default:chanset $chan chanevent.topic
+..-
+..$style(2) - $ncid(network.hash) - :return
+..$toggled($iif($changet(global,chanevent.topic) == hide,on)) Hide: chanset global chanevent.topic $iif($changet(global,chanevent.topic) != hide,hide)
+..$toggled($iif($changet(global,chanevent.topic) == status,on)) Status:chanset global chanevent.topic  $iif($changet(global,chanevent.topic) != status,status)
+..$toggled($iif($changet(global,chanevent.topic) == channel,on)) Channel:chanset global chanevent.topic  $iif($changet(global,chanevent.topic) != channel,channel)
+..$toggled($iif(!$changet(global,chanevent.topic),on)) Default:chanset global chanevent.topic
+..-
+..$style(2) - Global - :return
+..$toggled($iif($nvar(chanevent.topic) == hide,on)) Hide:nvar chanevent.topic $iif($nvar(chanevent.topic) != hide,hide)
+..$toggled($iif($nvar(chanevent.topic) == status,on)) Status:nvar chanevent.topic $iif($nvar(chanevent.topic) != status,status)
+..$toggled($iif($nvar(chanevent.topic) == channel,on)) Channel:nvar kickonban $iif($nvar(chanevent.topic) != channel,channel)
+..$toggled($iif(!$nvar(chanevent.topic),on)) Default:nvar chanevent.topic
+.Nicks
+..$style(2) - $chan - :return
+..$toggled($iif($changet($chan,chanevent.nick) == hide,on)) Hide: chanset $chan chanevent.nick $iif($changet($chan,chanevent.nick) != hide,hide)
+..$toggled($iif($changet($chan,chanevent.nick) == status,on)) Status:chanset $chan chanevent.nick  $iif($changet($chan,chanevent.nick) != status,status)
+..$toggled($iif($changet($chan,chanevent.nick) == channel,on)) Channel:chanset $chan chanevent.nick  $iif($changet($chan,chanevent.nick) != channel,channel)
+..$toggled($iif(!$changet($chan,chanevent.nick),on)) Default:chanset $chan chanevent.nick
+..-
+..$style(2) - $ncid(network.hash) - :return
+..$toggled($iif($changet(global,chanevent.nick) == hide,on)) Hide: chanset global chanevent.nick $iif($changet(global,chanevent.nick) != hide,hide)
+..$toggled($iif($changet(global,chanevent.nick) == status,on)) Status:chanset global chanevent.nick  $iif($changet(global,chanevent.nick) != status,status)
+..$toggled($iif($changet(global,chanevent.nick) == channel,on)) Channel:chanset global chanevent.nick  $iif($changet(global,chanevent.nick) != channel,channel)
+..$toggled($iif(!$changet(global,chanevent.nick),on)) Default:chanset global chanevent.nick
+..-
+..$style(2) - Global - :return
+..$toggled($iif($nvar(chanevent.nick) == hide,on)) Hide:nvar chanevent.nick $iif($nvar(chanevent.nick) != hide,hide)
+..$toggled($iif($nvar(chanevent.nick) == status,on)) Status:nvar chanevent.nick $iif($nvar(chanevent.nick) != status,status)
+..$toggled($iif($nvar(chanevent.nick) == channel,on)) Channel:nvar kickonban $iif($nvar(chanevent.nick) != channel,channel)
+..$toggled($iif(!$nvar(chanevent.nick),on)) Default:nvar chanevent.nick
+.Kicks
+..$style(2) - $chan - :return
+..$toggled($iif($changet($chan,chanevent.kick) == hide,on)) Hide: chanset $chan chanevent.kick $iif($changet($chan,chanevent.kick) != hide,hide)
+..$toggled($iif($changet($chan,chanevent.kick) == status,on)) Status:chanset $chan chanevent.kick  $iif($changet($chan,chanevent.kick) != status,status)
+..$toggled($iif($changet($chan,chanevent.kick) == channel,on)) Channel:chanset $chan chanevent.kick  $iif($changet($chan,chanevent.kick) != channel,channel)
+..$toggled($iif(!$changet($chan,chanevent.kick),on)) Default:chanset $chan chanevent.kick
+..-
+..$style(2) - $ncid(network.hash) - :return
+..$toggled($iif($changet(global,chanevent.kick) == hide,on)) Hide: chanset global chanevent.kick $iif($changet(global,chanevent.kick) != hide,hide)
+..$toggled($iif($changet(global,chanevent.kick) == status,on)) Status:chanset global chanevent.kick  $iif($changet(global,chanevent.kick) != status,status)
+..$toggled($iif($changet(global,chanevent.kick) == channel,on)) Channel:chanset global chanevent.kick  $iif($changet(global,chanevent.kick) != channel,channel)
+..$toggled($iif(!$changet(global,chanevent.kick),on)) Default:chanset global chanevent.kick
+..-
+..$style(2) - Global - :return
+..$toggled($iif($nvar(chanevent.kick) == hide,on)) Hide:nvar chanevent.kick $iif($nvar(chanevent.kick) != hide,hide)
+..$toggled($iif($nvar(chanevent.kick) == status,on)) Status:nvar chanevent.kick $iif($nvar(chanevent.kick) != status,status)
+..$toggled($iif($nvar(chanevent.kick) == channel,on)) Channel:nvar kickonban $iif($nvar(chanevent.kick) != channel,channel)
+..$toggled($iif(!$nvar(chanevent.kick),on)) Default:nvar chanevent.kick
+Logging
+.$style(2) $tab - $triml($active,=) - :return
+.$iif($window($active).logfile, $style(1)) On:log on
+.$iif(!$window($active).logfile, $style(1)) Off:log off
+.-
+.$iif(($window($active).logfile || ($ismod(logviewer.mod) && $active == status window)),$style(2) $tab - Logs -):!
+.$iif($window($active).logfile, View Log $cmdtip(logview)):logview $window($active).logfile
+.$iif((!$window($active).logfile && $ismod(logviewer.mod) && $active == status window), View Logs):logview  
+.$iif(($istok(channel query,$menutype,32)) && ($ismod(logviewer.mod)) && ($isfile($window($active).logfile)),Search Log $cmdtip(slog)) { var %q = $$input(Enter your search string. Wildcards are allowed,e, Search $menutype log $iif($menutype == query,with,in) $active) | slog $qt(%q) }
+.$iif($window($active).logfile, Delete Log):{ var %a = $$input(Are you sure you want to remove ' $+ $nopath($window($active).logfile) $+ ' ?,y) | if (%a) { .iecho remove -b $qt($window($active).logfile)  }  } 
+Ignore
+.All Events :!
+.$toggled($iif(33433?23 iswm $remove($hget(nxt_events,#),$chr(44)) && $hget(nxt_events,$+(show.text.,#)) == 4,on,off)) All $paren(+Text) {
+  if ((33433?23 iswm $remove($hget(nxt_events,#),$chr(44))) && ($hget(nxt_events,$+(show.actions.,#)) == 4) && ($hget(nxt_events,$+(show.text.,#)) == 4)) {
+    eventset -d # all
+  }
+  else { 
+    eventset -h # all
+  }
+}
+.-
+.$poptog($hget(nxt_events,$+(show.text.,#)),4) Text {
+  if ($hget(nxt_events,$+(show.text.,#)) == 4) {
+    eventset -d # text
+  }
+  else { 
+    eventset -h # text
+  }
+}
+.$poptog($hget(nxt_events,$+(show.actions.,#)),4) Actions {
+  if ($hget(nxt_events,$+(show.actions.,#)) == 4) {
+    eventset -d # actions
+  }
+  else { 
+    eventset -h # actions
+  }
+}
+.$poptog($mevnt(#,1),3) Joins {
+  if ($mevnt(#,1) == 3) {
+    eventset -d # joins
+  }
+  else {
+    eventset -h # joins
+  }
+}
+.$poptog($mevnt(#,2),3) Parts {
+  if ($mevnt(#,2) == 3) {
+    eventset -d # parts
+  }
+  else {
+    eventset -h # parts
+  }
+}
+.$poptog($mevnt(#,3),4) Quits {
+  if ($mevnt(#,3) == 4) {
+    eventset -d # quits
+  }
+  else {
+    eventset -h # quits
+  }
+}
+.$poptog($mevnt(#,4),3) Modes {
+  if ($mevnt(#,4) == 3) {
+    eventset -d # modes
+  }
+  else {
+    eventset -h # modes
+  }
+}
+.$poptog($mevnt(#,5),3) Topics {
+  if ($mevnt(#,5) == 3) {
+    eventset -d # topics
+  }
+  else {
+    eventset -h # topics
+  }
+}
+.$poptog($mevnt(#,7),2) Nicks {
+  if ($mevnt(#,7) == 2) {
+    eventset -d # nicks
+  }
+  else {
+    eventset -h # nicks
+  }
+}
+.$poptog($mevnt(#,8),3) Kicks {
+  if ($mevnt(#,8) == 3) {
+    eventset -d # kicks
+  }
+  else {
+    eventset -h # kicks
+  }
+}
+.-
+.Filter Text:{ chandisplay | .timer 1 0 did -c ircn.chandisplay 40 }
+-
+$iif($isalias($+($nget(networksupport), .channel+)), Channel $paren(net)) : .timer 1 0 $+($nget(networksupport), .channel+) #
+$iif($isalias($+($nget(ircdsupport), .channel+)), Channel $paren(ircd)) : .timer 1 0 $+($nget(ircdsupport), .channel+) #
+-
+; $iif(($me isop #) || ($me ishop #) || (t !isin $chan(#).mode) || ($_popup.topicurls(1) || $_popup.topicftps(1)),Topic)\
+Topic
+.Show topic $cmdtip(t):t
+.$iif(($me isop #) || ($me ishop #) || (t !isin $chan(#).mode),New) { topic # $$?="Enter new topic" }
+.$iif(($me isop #) || ($me ishop #) || (t !isin $chan(#).mode),Edit) { topic # $$input(Enter new topic,e,Topic for #,$chan(#).topic) }
+.-
+.$iif(($me isop #) || ($me ishop #) || (t !isin $chan(#).mode),Add) { at $$?="Enter text to add to topic" }
+.$iif(($me isop #) || ($me ishop #) || (t !isin $chan(#).mode),Clear) { ct }
+.-
+.$iif(($me isop #) || ($me ishop #) || (t !isin $chan(#).mode),$iif($nget($tab(chan,#,holdtopic)) != on,Hold)) { ht }
+.$iif(($me isop #) || ($me ishop #) || (t !isin $chan(#).mode),$iif($nget($tab(chan,#,holdtopic)) == on,unHold)) { ut }
+.-
+.$iif(($me isop #) || ($me ishop #) || (t !isin $chan(#).mode),Random) { rt }
+.$iif(($me isop #) || ($me ishop #) || (t !isin $chan(#).mode),Refresh) { reft }
+.-
+.$iif(($_popup.topicurls(1) || $_popup.topicftps(1)),List Sites $cmdtip(topicsites)) : topicsites
+.$iif(($_popup.topicurls(1) || $_popup.topicftps(1)),Goto Sites)
+..$submenu($_popup.topicurls($1))
+..$submenu($_popup.topicftps($1))
+.$submenu($_popup.sub(channel, topic, $1))
+$iif($me ison #,Mode)
+.Channel Central { .timer 1 0 channel # }
+.Help
+..Common Channel Modes:url http://www.alien.net.au/irc/chanmodes.html
+.-
+.Current Mode $tab $chan(#).mode { mode # $$input(Set channel mode,e,Channel for #,$chan(#).mode) } 
+.-
+.$iif($me isop #, Common)
+..+tn { mode # +tn }
+..+stn { mode # +stn }
+..+stin { mode # +stin }
+..+stnl { mode # +stnl $$input(Channel limit number:,e) }
+..+stinl { mode # +stinl $$input(Channel limit number:,e) }
+.$popcmode(#, s, op, Secret	+s) { togglecmode # s }
+.$popcmode(#, p, op, Private	+p) { togglecmode # p }
+.$popcmode(#, l, op, Limit users	+l $paren($gettok($chan(#).mode,2,32))) {
+  togglecmode # l $iif(l !isincs $chan(#).mode,$$input(How many users should be limited to this channel?,e,Chan Limit,$gettok($chan(#).mode,2,32)))
+}
+.$popcmode(#, i, op, Invite only	+i) { togglecmode # i }
+.$popcmode(#, m, op, Moderated	+m) { togglecmode # m }
+.$popcmode(#, k, op, Channel key	+k) { togglecmode # k $iif(!$chan(#).key, $$input(Enter key:,e)) }
+.$popcmode(#, t, op, Protect topic	+t) { togglecmode # t }
+.$popcmode(#, n, op, No external msgs	+n) { togglecmode # n }
+.$submenu($_popup.sub(channel, mode, $1))
+$iif($me isop # || $me ishop #,Bans)
+.Add Ban : bban $$input(Enter a nickname or a hostmask to ban,e,Add Ban)
+.$iif($ibl(#,0),Rem Ban):mode # -b $$_removebanprompt(#,Remove Ban $+ $chr(58),Remove Ban in #)
+.$iif(($issupport(excepts) || $issuport(invex)), Exemptions)
+..$iif($issupport(excepts),Add Ban Exempt):iecho heh
+..$iif(($issupport(excepts) && $iel(#,0)),Rem Except):iecho heh
+..$iif($issupport(invex),Add Invite Exempt):iecho heh
+..$iif(($issupport(invex) && $iil(#,0)),Rem Invite):iecho heh
+.-
+.List Bans $cmdtip(rban):rban
+.Clear Bans $cmdtip(clbans):clbans
+.Enforce Bans $cmdtip(enbans):enbans
+.$submenu($_popup.sub(channel, ban, $1))
+$iif($me ishop #,Mass)
+.Voice:mv
+.De-voice:mdv
+.-
+.Kick
+..All:mkick -a
+..-
+..Regulars:mkick -r
+..Nonops:mkick -n
+..Voices:mkick -v
+..-
+..$iif($ismod(userlist.mod),$toggled($nvar(mkick.nousers)) Exclude Userlist) { nvartog mkick.nousers }
+..$toggled($nvar(mkick.reverse)) Reverse Order { nvartog mkick.reverse }
+.Kick-Ban
+..All:mkb -a
+..-
+..Regulars:mb -r
+..Nonops:mb -n
+..Voices:mkb -v
+..-
+..$toggled($nvar(mkb.nousers)) Exclude Users { nvartog mkb.nousers }
+..$toggled($nvar(mkb.reverse)) Reverse Order { nvartog mkb.reverse }
+$iif($me isop #,Mass)
+.Op $cmdtip(mop):mop
+.De-op $cmdtip(mdop):mdop
+.-
+.Voice $cmdtip(mv):mv
+.De-voice $cmdtip(mdv):mdv
+.-
+.Kick $cmdtip(mkick)
+..All:mkick -a
+..-
+..Ops:mkick -o
+..Regulars:mkick -r
+..Non-ops:mkick -n
+..Voices:mkick -v
+..Half-ops:mkick -h
+..Idle $cmdtip(idlekick)
+...All:idlekick -a
+...-
+...Ops:idlekick -o
+...Regulars:idlekick -r
+...Non-ops:idlekick -n
+...Voices:idlekick -v
+...Half-ops:idlekick -h
+...-
+...$style(2) $chr(9) - Settings -:!
+...Duration $paren($rsc($duration($iifelse($nvar(idlekick.duration),3600)))) : nvar idlekick.duration $time2secs($$input(Number of seconds $+ $chr(44) minutes $+ $chr(44) or hours $paren(ex: 3h 32s),e,Idle kick duration,$rsc2($duration($nvar(idlekick.duration)))))
+..-
+..$style(2) $chr(9) - Settings && Toggles -:!
+..$toggled($nvar(mkick.nousers)) Exclude Users { nvartog mkick.nousers }
+..$toggled($nvar(mkick.reverse)) Reverse Order { nvartog mkick.reverse }
+.Kick-Ban $cmdtip(mkb)
+..All:mkb -a
+..-
+..Ops:mkb -o
+..Regulars:mb -r
+..Non-ops:mb -n
+..Voices:mkb -v
+..Half-ops:mkb -h
+..Idle $cmdtip(idlekb)
+...All:idlekb -a
+...-
+...Ops:idlekb -o
+...Regulars:idlekb -r
+...Non-ops:idlekb -n
+...Voices:idlekb -v
+...Half-ops:idlekb -h
+...-
+...$style(2) $chr(9) - Settings- :!
+...Duration $paren($rsc($duration($iifelse($nvar(idlekick.duration),3600)))) : nvar idlekick.duration $time2secs($$input(Number of seconds $+ $chr(44) minutes $+ $chr(44) or hours $paren(ex: 3h 32s),e,Idle kick duration,$rsc2($duration($nvar(idlekick.duration)))))
+..-
+..$style(2) $chr(9) - Settings && Toggles - :!
+..$iif($ismod(userlist.mod),$toggled($nvar(mkb.nousers)) Exclude Users) { nvartog mkb.nousers }
+..$toggled($nvar(mkb.reverse)) Reverse Order { nvartog mkb.reverse }
+..$toggled($nvar(mkb.expire)) Expire Time $+ $chr(58) { nvartog mkb.expire | if ($nvar(mkb.expire)) { nvar mkb.expiretime $$input(Enter time in minutes,e) }  }
+..-
+..$submenu($_popup.sub(channel, mass, $1))
+&Info
+.$style(2) $tab - $chan - :!
+.Joined $+ $chr(58) $tab $rsc2($trimdur($chanwasted(#),$iif($chanwasted(#) > 60,s))) :!
+.My Idle $+ $chr(58) $tab $rsc2($trimdur($nick(#,$me).idle,$iif($nick(#,$me).idle > 60,s))) :!
+.Others Idle $+ $chr(58) $tab  $rsc2($trimdur($chan(#).idle,$iif($chan(#).idle > 60,s))) :!
+.-
+.$style(2) $tab  - Commands - :!
+.Totals $cmdtip(cstats) { cstats }
+.Bans $cmdtip(rban) { rban }
+.IrcOPs $cmdtip(ircops) { ircops }
+.Names $cmdtip(names) { names # }
+.Idle $cmdtip(idlescan) { idlescan $$time2secs($input(How many seconds $+ $chr(44) minutes $+ $chr(44) or hours are the users allowed to be idle for? $paren(ex: 2h 45m 30s),e,Idle scan,1h)) }
+.Non-Idle $cmdtip(nonidlescan) { nonidlescan $$time2secs($input(How many seconds $+ $chr(44) minutes $+ $chr(44) or hours should the users have been active in? $paren(ex: 2h 45m 30s),e,Non-Idle scan,1h)) }
+.Clones $cmdtip(clones) { clones }
+.$iif($ismod(userlist),Userlist Friends  $cmdtip(ufind))  { ufind }
+.$submenu($_popup.sub(channel, info, $1))
+Ctcp
+.$style(2) - Ctcp Channel - :!
+.Ping { ctcp # ping }
+.Time { ctcp # time }
+.xDCC List { ctcp # xdcc list }
+.Finger { ctcp # finger }
+.Version { ctcp # version }
+.$submenu($_popup.sub(channel, ctcp, $1))
+.-
+.Other { ctcp # $$?="Enter ctcp request." }
+$iif(($svc.ispopupok(channel) && $nget(defaultservices) $+ $nget(netservices)), Services)
+$iif($ismod(autojoin.mod),&Autojoin)
+-
+$iif($me !ison #,&Rejoin) { join # }
+$iif($me ison #,Filter $cmdtip(filt)):filt $$input(Enter your filter ex: * has joined *,e)
+$iif($me ison #,Part $cmdtip(part)) { part }
+$iif($me ison #,Cycle $cmdtip(cycle)) { cycle }
+$submenu($_popup.sub(channel, cmds, $1))
+-
+E&xtras
+.Add Favorite:favchan add #
+.$iif(!$istok($nvar(hidechans),#,44),Add Hidden):{ nvar hidechans $addtok($nvar(hidechans),$chan,44) |   window -w0 # | iecho Added $hc(#) to hidden channel list. Use irc $+ $u(N) -> Extras -> Hidden to configure   }
+.$iif($istok($nvar(hidechans),#,44),Rem Hidden):{ nvar hidechans $remtok($nvar(hidechans),$chan,1,44) |   window -w3 # | iecho Removed $hc(#) to hidden channel list. }
+.-
+.Advertise
+..ircN ver $cmdtip(/sv):sv
+..Modules $cmdtip(/modv):modv
+..Usage $cmdtip(usage):usage
+..Usage+ $cmdtip(svinfo):svinfo
+..Network Usage $cmdtip(netusage):netusage
+.$iif($url(0),URL catcher)
+..$submenu($_popup.chanurlsrecent($1))
+..-
+..Show All:url show
+..-
+..$style(2) - Settings -:return
+..Max URLs $paren($iifelse($nvar(popup.urlcatch.maxurls),20)) { 
+  var %a = $$input(Enter the maximum number of recent urls to show,e,URL Catcher, $iifelse($nvar(popup.urlcatch.maxurls),20))
+  if (%a isnum) && (%a > 0) nvar popup.urlcatch.maxurls %a
+}
+.Internal List
+..Update Address List $cmdtip(updIAL):updial
+;..Clear Address List $tab $paren($bytes($ialchantotalbytes(#)).suf)):clearial #
+..-
+..Update Ban List  $cmdtip(updIBL):updibl
+.$submenu($_popup.sub(channel, extras, $1))
+&Windows
+-

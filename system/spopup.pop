@@ -1,0 +1,340 @@
+Connection
+.Connect { con }
+.New &session { server -n }
+.-
+.$iif($istok(loggingon connected,$status,32),Reconnect) { recon }
+.$iif($istok(loggingon connected,$status,32),Disconnect) { disco  }
+.-
+.Auto connect { autoconnect }
+.$iif(($curnet && $nget(serverlist.0)),$shorttext(20,$curnet))
+..$style(2) - Switch Server -:!
+..$submenu($_popup.networksserver($1))
+.&History
+..$submenu($_popup.recentserver($1))
+..-
+..$iif($nvar(recentservers),Clear):nvar recentservers
+.Favorites
+..$submenu($_popup.favoriteconnect($1))
+..-
+..Add { 
+  var %a = $$input(Enter a Server or Network to add,e,Add Connection Favorite [ $cr ] Example: $server or $curnet , $server) 
+  favcon add %a
+}
+..$iif($nvar(favoriteconnect),Del) { 
+  var %a = $$input(Enter a Server or Network to remove,e,Remove Connection Favorite [ $cr ] Example: $server or $curnet , $server) 
+  favcon del %a
+}
+..$iif($nvar(favoriteconnect),Clear):nvar favoriteconnect
+-
+$iif($connected, &Personal)
+.$style(2) $tab - Personal Information -  :!
+.$iif(!$connected,Status $+ $chr(58) $status) : !
+.Nickname $+ $chr(58) $tab $shorttext(35,$me) { $iif($cwiget($me,cwho),whoami,whois $me) }
+.$iif($cwiaddr($me),Address $+ $chr(58) $tab $shorttext(35,$cwiaddr($me))) :dns $cwiaddr($me)
+.$iif($iifelse($cwiget($me,cdns),$ip),IP-Addr $+ $chr(58) $tab $iifelse($cwiget($me,cdns),$ip) ) : dns $iifelse($cwiget($me,cdns),$ip)
+.$iif($cwiget($me,ident),Ident $+ $chr(58) $tab $cwiget($me,ident)) :!
+.$iif($cwiget($me,ircname),Real Name $+ $chr(58) $tab $cwiget($me,ircname)) :!
+.Server $+ $chr(58) $tab $server $iif($cwiget($me,hops),$paren($cwiget($me,hops) hops)) $+ :dns $server
+.$iif($mychans,Channels $paren($numtok($com.channels($me),44)) $+ $chr(58) $tab $shorttext(35,$replace($com.channels($me).prefix,$chr(44),$chr(32))) ) :iecho You are in the channel $+ $plural($numtok($mychans,44)) $+ : $hc $+ $replace($commaseparate($replace($mychans,$chr(44),$chr(32))),$chr(44), $+ $chr(44) $+ $hc)
+.$iif(($mychans.public && $mychans.public != $mychans),Public Chans $paren($numtok($mychans.public,44)) $+ $chr(58) $tab $shorttext(35,$replace($mychans.public,$chr(44),$chr(32))) ) :iecho You are visible in these channels from a whois: $hc $+ $replace($commaseparate($replace($mychans.public,$chr(44),$chr(32))),$chr(44), $+ $chr(44) $+ $hc) 
+.$iif($online,Online $+ $chr(58) $tab $trimdur($online,$iif($online > 60,s)) $paren($asctime.short($calc($ctime - $online)),[,])) :netinfo
+.Idle $+ $chr(58) $tab $trimdur($idle,$iif($idle > 60,s))  :netinfo
+.$iif($ncid(lastspoke),$iif($server, Last Spoke $+ $chr(58) $tab $trimdur($calc($ctime - $ncid(lastspoke)),$iif($calc($ctime - $ncid(lastspoke)) > 3600,s)) )) :netinfo
+.$iif($_notifypopup.online, Friends Online $+ $chr(58) $tab $_notifypopup.online) :notify
+.$iif(o isin $usermode, ircOP) { mode $me -o } 
+.$iif($away, $style(1) Away $tab $paren($shorttext(15,$strip($awaymsg)))) { .back }
+.$iif($away, Away Time $tab  $trimdur($awaytime,$iif($awaytime > 60,s))) : !
+.-
+. $style(2) $tab - Commands - :!
+.Change Nickname $cmdtip(nick):nick $$input(Enter a new nickname,e,Change nickname,$me)
+; .$iif($ismod(away),Change Away Nickname $+ $chr(58) $paren($nget(awaynickname))):modset away awaynickname $$input(Enter a new away nickname,e,Change nickname,$me)
+.Whois Me $cmdtip(whois):whois $me
+.-
+$iif($connected,&Contacts)
+$null : !
+$iif($connected,Channels)
+.$iif($ismod(classicui), Setup $cmdtip(chansettings) ):chansettings
+.$iif($ismod(classicui), Display $cmdtip(chandisplay) ) :chandisplay
+.-
+.History
+..Clear { remini $mircini chanhist | saveini }
+..-
+..$submenu($_popup.chanhistory($1))
+.Favorites
+..Add {
+  var %a = $$input(What channel do you want to add to your favorites menu?,e)
+  favchan add %a
+}
+..$iif($ini($mircini,chanfolder,0),Del) {
+  var %a = $$input(What channel do you want to remove from your favorites menu?,e)
+  favchan del %a
+}
+..$iif($ini($mircini,chanfolder,0),Clear):remini $mircini chanfolder
+..-
+..$submenu($_popup.favoritechannel($1))
+.-
+.$style(2) $tab - Commands - :return
+.$iif($server, Channel list)
+..Channel list $cmdtip(list) { list $iif(!$nvar(listchan.nolistoptions),  -MIN  $iifelse($nvar(listchan.min), $mopt(4,6))  -MAX $iifelse($nvar(listchan.max), $mopt(4,7))  $nvar(listchan.match)  )  }
+..-
+..$iif($isfile($sys(channels\ $+ $curnet $+ .txt)), Open cache $cmdtip(chanlist))  {  if (($ismod(classicui)) && ($lines($sys(channels\ $+ $curnet $+ .txt)) >= 3000)) dlg -r ircn.pleasewaitfreeze | .timer 1 1 chanlist }
+..-
+..$iif(!$nvar(listchan.nolistoptions),$style(1)) Use Critera $+ $chr(58) :nvartog listchan.nolistoptions
+..Minimum $+ $chr(58) $tab $paren($iifelse($nvar(listchan.min),$mopt(4,6)),[,]) :nvar listchan.min $$input(Minimum amount of users in channel list, e, Channel List, $iifelse($nvar(listchan.min),$mopt(4,6)))
+..Maximum $+ $chr(58) $tab $paren($iifelse($nvar(listchan.max),$mopt(4,7)),[,]) :nvar listchan.max $$input(Minimum amount of users in channel list, e, Channel List, $iifelse($nvar(listchan.max),$mopt(4,7)))
+..Match Text $+ $chr(58) $tab [___] :nvar listchan.match $$input(Match channels in listing with this phrase $+ $chr(58), Channel List, $iifelse($nvar(listchan.max),$mopt(4,7)),e)
+..-
+.$iif($server, Join $cmdtip(join) ):join $$input(Which channel would you like to join?,e)
+.$iif($mychans, Part $cmdtip(part) ):part $$input(Which channel would you like to part?,e)
+.$iif($mychans, Part All $cmdtip(partall) ):partall
+.$iif($server, Request Invite $cmdtip(knock) ):.quote knock $$input(Which channel would you like to request an invite to?,e,/knock #channel - For invite only channels)
+.$iif($server, Show Who $cmdtip(who)  ): who $$input(Which channel do you want to perform a /who on? [ $cr ] Note: This will only show users who are not set as invisible $paren(+i) ,e)
+.$iif($server, Show Names $cmdtip(names)  ): names $$input(Which channel do you want to perform a /names on? [ $cr ] Note: This will only show users who are not set as invisible $paren(+i)  ,e)
+.$iif($server, Show Topic $cmdtip(topic)  ): topic $$input(Which channel do you want to perform a /names on? [ $cr ] Note: This will only show users who are not set as invisible $paren(+i)  ,e)
+$iif($server,Usermode)
+.Settings
+..Set Global default usermode $tab $paren($nvar(umode)):nvar umode $input(Default usermode to use: $paren(ie. +i),e,Default usermode,$nvar(umode))
+..-
+..$iif(($ncid(network.hash) || $curnet),Set $iifelse($ncid(network.hash),$curnet) default usermode  $tab $paren($nget(umode))):nset umode $input(Default usermode to use for $ncid(network.hash) $+ $chr(58) $paren(ie. +i $+ $chr(44) or leave empty for default),e,Default $ncid(network.hash) usermode,$nget(umode))
+..-
+..$iif($curircd,Set $gettok($curircd,1,32) IRCd default usermode  $tab $paren($nvar(umode.ircd. $+ $gettok($curircd,1,32)))):nvar umode.ircd. $+ $gettok($curircd,1,32) $input(Default usermode to use for $gettok($curircd,1,32) IRCd $+ $chr(58) $paren(ie. +i $+ $chr(44) or leave empty for default),e,Default $gettok($curircd,1,32) usermode,$nvar(umode.ircd. $+ $gettok($curircd,1,32)))
+.Help
+..Common User Modes: url http://www.alien.net.au/irc/usermodes.html
+.-
+.Current Mode $tab $usermode { umode $$input(Set usermode,e,Usermode for $me,$usermode) } 
+.$iif(($ncid(umode_unknown) && ($ismod(services.mod))),$style(2) Unknown Modes		+ $+ $ncid(umode_unknown)) :!
+.-
+.$iif(i isincs $usermode,$style(1)) Invisible	+i { toggleumode i }
+.$iif(w isincs $usermode,$style(1)) Show Wallops	+w { toggleumode w } 
+.$iif(s isincs $usermode,$style(1)) Show Snotices	+s { toggleumode s }
+.$iif(o isincs $usermode,$style(1) Global ircOP	+o) { toggleumode o }
+.$iif(O isincs $usermode,$style(1) Local ircOP		+O) { toggleumode O }
+.$submenu($_popup.sub(server, umode, $1))
+$iif($connected,&Network)
+.$iif($server,$style(2) $tab - $curnet -) :!
+.$iif($ismod(classicui),&Settings $cmdtip(netsettings) ) { netsettings }
+.$iif($connected, Quick settings)
+..$style(2) $tab - $ncid(network.hash) -:!
+..$iif($ismod(services.mod),Network Support)
+...Network Support
+....$iif(!$remove($nget(networksupport.type),-,Auto Detect),$style(1))  Auto:_switchsup.net -Auto Detect-
+....$iif($nget(networksupport.type) == -Disabled-, $style(1))  Disabled:_switchsup.net -Disabled-
+....-
+....$submenu($_popup.netsupport.networks($1)) 
+...IRCd Support
+....$iif(!$remove($nget(ircdsupport.type),-,Auto Detect),$style(1))  Auto:_switchsup.ircd -Auto Detect-
+....$iif($nget(ircdsupport.type) == -Disabled-, $style(1))  Disabled: _switchsup.ircd -Disabled-
+....-
+....$submenu($_popup.netsupport.ircds($1)) 
+..Usermode
+...Default Usermode $+ $chr(58) $tab $paren($iifelse($nget(umode),______),[,]) :nset umode $input(Default usermode to use for $ncid(network.hash) $+ $chr(58) $paren(ie. +i $+ $chr(44) or leave empty for default),e)
+..Auto ircOP
+...Username $+ $chr(58) $tab $paren($iifelse($nget(ircop.user),______),[,]) : !
+...Password $+ $chr(58) $tab $paren($iif($nget(ircop.pass),******,______),[,]) : !
+...Usermode $+ $chr(58) $tab $paren($iifelse($nget(ircop.umode),______),[,]) : !
+...-
+...Edit ircOP Perform: ircopedit $curnet
+..Auto update links
+...$toggled($iif($nget(autoupdatelinks) == off,on)) Disabled:nset autoupdatelinks off
+...$toggled($iif($nget(autoupdatelinks) == on,on)) Enabled:nset autoupdatelinks on
+...$toggled($iif(!$nget(autoupdatelinks),on)) Default:nset autoupdatelinks
+..Keep servers fresh
+...$toggled($iif($nget(serverlistkeepfresh) == off,on)) Disabled:nset serverlistkeepfresh off
+...$toggled($iif($nget(serverlistkeepfresh) == on,on)) Enabled:nset serverlistkeepfresh on
+...$toggled($iif(!$nget(serverlistkeepfresh),on)) Default:nset serverlistkeepfresh
+..Reconnect on kill
+...$toggled($iif($nget(reconnectonkill) == off,on)) Disabled:nset reconnectonkill off
+...$toggled($iif($nget(reconnectonkill) == on,on)) Enabled:nset reconnectonkill on
+...$toggled($iif(!$nget(reconnectonkill),on)) Default:nset reconnectonkill
+..Hop server on lag
+...$toggled($iif($nget(hoponlag) == on,on)) Enabled:nset hoponlag on
+...-
+...Config:{ dlg ircn.switchserverlag | did -ra ircn.switchserverlag 11 $curnet }
+..-
+..$iif($server,$style(2) $tab - Global -) :!
+..Usermode
+...Default Usermode $+ $chr(58) $tab $paren($iifelse($nvar(umode),______),[,]) :nvar umode $input(Default usermode to use for global connections $paren(ie. +i $+ $chr(44) or leave empty to clear it),e)
+..Settings expiration
+...$iif($nvar(netsettingskeep),$style(2)) Age $+ $chr(58) $tab $paren($iifelse($nvar(netsettingsexpiredays) days,______),[,])  :nvar netsettingsexpiredays $$input(Enter the number of days that have passed before deleting the unused network setting file.,e,ircN Network Settings Expiration,$iifelse($nvar(netsettingsexpiredays),30))
+...-
+...$toggled($nvar(netsettingskeep)) Never Expire :nvartog netsettingskeep
+..$toggled($nvar(autoupdatelinks)) Auto update links:nvartog autoupdatelinks
+..$toggled($nvar(keepserverlistfresh))  Keep servers fresh:nvartog keepserverlistfresh
+..$toggled($nvar(reconnectonkill))  Reconnect on kill:nvartog reconnectonkill
+.Maintenence
+..$iif($server,$style(2) $tab - $curnet -) :!
+..Add Server to Network:{ var %a = $$input(Add server to group ' $+ $curnet $+ ',e,Add Server,$server) | var %p = $iif(: isin %a,$gettok(%a,2,58),$gettok(%a,2,32)) | server -a $gettok(%a,1,32) -g $curnet $iif($remove(%p,-,$chr(44)) isnum, -p %p) | _mknetworklist }
+..Remove Server from Network:{ server -r $$input(Remove server from network ' $+ $curnet $+ ',e,Remove Server,$server) | _mknetworklist }
+..-
+..Update new servers $tab $cmdtip(addlinks) :addlinks
+..Remove dead servers $tab $cmdtip(deadlinks) :deadlinks
+..-
+..$style(2) $tab - Global -:!
+..Import new servers.ini $tab $paren(add only):addsrv
+..Import new servers.ini $tab $paren(add+prune):addsrv prune
+.-
+.$iif(!$nvar(collapse.ircN.status/network/networkinfo),$style(1)) $tab - Network Information - {
+  nvartog collapse.ircN.status/network/networkinfo
+  iecho $iif($nvar(collapse.ircN.status/network/networkinfo), Collapsed, Expanded) Status -> Network -> Network Information 
+}
+.$iif($shownetinfopop(network), Network $+ $chr(58) $tab $curnet(noserver) ):netinfo
+.$iif($shownetinfopop(server), Server $+ $chr(58) $tab $server ) { dns $server }
+.$iif(($shownetinfopop(server) && $server != $serverip), Server IP $+ $chr(58) $tab $serverip ) { dns $serverip }
+.$iif($shownetinfopop(server), Port $+ $chr(58) $tab $remove($port,+) $iif($ssl,$paren(SSL)) ):!
+.$iif(($shownetinfopop(server) && $ncid(server_sslinfo)),Encryption $+ $chr(58) $tab $shorttext(25,$ncid(server_sslinfo))) :iecho Connected to $+($server,:,$remove($port,+)) (SSL) with $hc($ncid(server_sslinfo)) encryption.
+.$iif(($shownetinfopop(server) && $ncid(lag)), Latency $+ $chr(58) $tab $hlag $iif($ncid(lag.avg),$paren($ncid(lag.avg) $+ s avg))):netinfo
+.$iif($shownetinfopop(server),Uses $+ $chr(58) $tab $networkuses ): netinfo
+.$iif($shownetinfopop(server), Total Duration $+ $chr(58) $tab $duration($calc($nget(pong) * 60)) ):netinfo
+.$iif($shownetinfopop(ircd), Ircd $+ $chr(58) $tab $shorttext(20,$curircd) ) : iecho This server is running IRCD: $hc($curircd)
+.$iif($shownetinfopop(network), $iif($nget(netwebsite),Visit Website $+ $chr(58) $tab $shorttext(15,$remove($nget(netwebsite),http $+ $chr(58) $+ //, www.))))) { www $nget(netwebsite) }
+.$iif($shownetinfopop(network), SearchIRC info) { www http://searchirc.com/network/ $+ $curnet }
+.-
+.$iif($server, $style(2) $tab - Commands - ) :!
+.$iif($ncid(can_vhost),vHost)
+..vHost Login $cmdtip(vhost) { .quote vhost $$input(vHost Username,e,vHost Login) $$input(vHost Password,e,vHost Login) } 
+..-
+..$ntog(vhost.enabled) Enable Auto vHost:ntog vhost.enabled
+..Username $+ $chr(58) $tab $paren($iifelse($nget(vhost.user),______)):nset vhost.user $input(vHost username,e,vHost Login,$nget(vhost.user)) 
+..$iif(!$nget(vhost.user), $style(2)) Password $+ $chr(58) $tab $paren($iif(($nget(vhost.user) && $nget(vhost.pass)),$str(*,$len($nget(vhost.pass))),______)):nset vhost.pass $input(vHost Password for ' $+ $nget(vhost.user) $+ ',e,vHost Login,$nget(vhost.pass)) 
+..-
+..$iif($ncid(vhost.enabled), $style(2) $tab - Status -):!
+..$iif($ncid(vhost.enabled), $style(1) Enabled vHost) :!
+..$iif($ncid(vhost.host), vHost $+ $chr(58) $tab $shorttext(15,$ncid(vhost.host))):iecho Your vHost is currently $+ $chr(58) $hc($ncid(vhost.host))
+.Stats $cmdtip(stats) 
+..$iif(!$nvar(popup.status.hidestatstip), $style(2) Tip $+ $chr(58) Use with care):!
+..$iif(!$nvar(popup.status.hidestatstip), $style(2) Certain /stats commands alert ircops) :!
+..$iif(!$nvar(popup.status.hidestatstip), Hide this tip?) { if ($$input(Are you sure you want to remove this tip from the stats popup?,y)) { nvar popup.status.hidestatstip on } }
+..-
+..$style(2) $tab - Common - :!
+..Global Bans $tab $brak(g):.quote stats g
+..Local Bans $tab $brak(k):.quote stats k
+..Commands $tab $brak(m):.quote stats m
+..IRC Operators $tab $brak(o):.quote stats o
+..Uptime $tab $brak(u):.quote stats u
+..Other $tab $brak(?):stats $$input(Enter the /stats mode,e)
+.$iif($server, Network Links $cmdtip(links) ) { links }
+.$iif($server, Network Map $cmdtip(map) ) { map }
+.$iif($server, Link Looker $cmdtip(ll) ) { ll }
+.$iif($server, Server MOTD $cmdtip(motd) ) { .quote motd }
+.$iif($server, Server Rules $cmdtip(rules) ) { .quote rules  }
+.$iif($server, Server Ping $cmdtip(sping) ) { sping }
+.$iif($server, Server Time $cmdtip(time) ) { .quote time }
+.$iif($server, Server Info $cmdtip(info) ) { .quote info }
+.$iif($server, Local Users $cmdtip(lusers) ) { lusers }
+.$iif($server, Ircops $cmdtip(trace) ) { trace $input(Enter server name: $paren(cancel to scan current server),e) }
+.$iif($server, Admin $cmdtip(admin) ) { .quote admin $input(Which server? $paren(press cancel for the current server),e,Server Admin) }
+.$submenu($_popup.sub(server, server, $1))
+$iif($svc.ispopupok(status), Services)
+.$iif(($ncid(can_dccallow) || $ncid(can_silence) || ($ismod(services.mod))), $style(2) $tab - Network Features - ):!
+.$iif(($server && !$nget($tab(auth, disableall))), Authentication  $cmdtip(netauth))
+..$iif($ismod(classicui),Authentication $cmdtip(netauth) ) { netauth }
+..-
+..Add Account : ncid netauth.user $$input(Which username would you like to add to authentication? [ $cr ] $+ Note: This won't be saved until you set a password,e, Network Authentication, $iifelse($ncid(netauth.user),$me)))
+..$iif(!$isauthuser($ncid(netauth.user)),$style(2)) Remove Account? {
+  var %a = $$input(Are you sure you want to remove the ' $+ $iifelse($ncid(netauth.user),$me) $+ ' authentication account? ,y)
+  if (%a) ndel -w $tab(auth,$iifelse($ncid(netauth.user),$me),*)
+}
+..Edit Account
+...$submenu($_popup.authusers($1))
+..-
+..$style(2) $tab - Account - :!
+..Username $+ $chr(58) $tab  $paren($iifelse($ncid(netauth.user),$me),[,]) :ncid netauth.user $$input(Which username would you like to edit settings for?,e, Network Authentication, $iifelse($ncid(netauth.user),$me)))
+..Password $+ $chr(58) $tab $paren($iif($nget($tab(auth,$iifelse($ncid(netauth.user),$me),passwd)),$str(*,$len($v1)),______),[,]) :  _netauth.makenewusr $iifelse($ncid(netauth.user),$me)  $$input(Enter authentication password for ' $+ $iifelse($ncid(netauth.user),$me) $+ ' $+ :,e, Auth password, $nget($tab(auth,$iifelse($ncid(netauth.user),$me), passwd)))
+..-
+..$style(2) $tab - Settings - :!
+..$iif(!$isauthuser($ncid(netauth.user)),$style(2)) Auth cmd $+ $chr(58) $tab $paren($shorttext(10,$iifelse($nget($tab(auth,$iifelse($ncid(netauth.user),$me),authcmd)),______)),[,]) :nset $tab(auth,$iifelse($ncid(netauth.user),$me),authcmd) $input(Enter the authentication command [ $cr ] $+ Variables:  <pass> = password $+ $chr(44) <username> = username,e, Auth Command,$iifelse($nget($tab(auth,$iifelse($ncid(netauth.user),$me),authcmd)), /nickserv IDENTIFY <pass>))
+..$iif((!$isauthuser($ncid(netauth.user)) || $nget($tab(auth, disableghosting)) ),$style(2)) Ghost cmd $+ $chr(58) $tab $paren($shorttext(10,$iifelse($nget($tab(auth,$iifelse($ncid(netauth.user),$me),ghostcmd)),______)),[,]) :nset $tab(auth,$iifelse($ncid(netauth.user),$me),ghostcmd) $$input(Enter the ghost command [ $cr ] $+ Variables:  <pass> = password $+ $chr(44) <username> = username,e, Ghost Command,$iifelse($nget($tab(auth,$iifelse($ncid(netauth.user),$me),ghostcmd)), /nickserv GHOST <username> <pass>))
+..$iif((!$isauthuser($ncid(netauth.user)) || $nget($tab(auth, disableauthreq)) ),$style(2)) Request nick $+ $chr(58) $tab $paren($iifelse($nget($tab(auth,$iifelse($ncid(netauth.user),$me),requestnick)),______),[,]) :nset  $tab(auth,$iifelse($ncid(netauth.user),$me),requestnick) $$input(Enter request nickname,e, Auth Request nickname, $iifelse($nget($tab(auth,$iifelse($ncid(netauth.user),$me),requestnick)), Nickserv))
+..$iif((!$isauthuser($ncid(netauth.user)) || $nget($tab(auth, disableauthreq)) ),$style(2)) Match string $+ $chr(58) $tab $paren($shorttext(10,$iifelse($nget($tab(auth,$iifelse($ncid(netauth.user),$me),requestwc)),______)),[,])  : nset $tab(auth,$iifelse($ncid(netauth.user),$me),requestwc) $$input(Enter the request match string [ $cr ] $+ Ex: *please choose a different nick*,e, Auth request match string,$iifelse($nget($tab(auth,$iifelse($ncid(netauth.user),$me),requestwc)), *please choose a different nick*))
+..-
+..$style(2) $tab - Toggles - :!
+..$iif(!$isauthuser($ncid(netauth.user)),$style(2)) $toggled($nget($tab(auth,$iifelse($ncid(netauth.user),$me),onconnect))) Auth on connect:ntog $tab(auth,$iifelse($ncid(netauth.user),$me),onconnect)
+..$iif((!$isauthuser($ncid(netauth.user)) || $nget($tab(auth, disableauthreq))),$style(2)) $toggled($nget($tab(auth,$iifelse($ncid(netauth.user),$me),onrequest))) Auth on request:ntog $tab(auth,$iifelse($ncid(netauth.user),$me),onrequest)
+..$iif((!$isauthuser($ncid(netauth.user)) || $nget($tab(auth, disableghosting)) ),$style(2)) $toggled($nget($tab(auth,$iifelse($ncid(netauth.user),$me),ghost))) Enable ghosting:ntog $tab(auth,$iifelse($ncid(netauth.user),$me),ghost)
+..$iif((!$isauthuser($ncid(netauth.user)) || $nget($tab(auth, disableghosting)) ),$style(2)) $toggled($nget($tab(auth,$iifelse($ncid(netauth.user),$me),reget))) Reget nick on ghost:ntog $tab(auth,$iifelse($ncid(netauth.user),$me),reget)
+..$iif(!$isauthuser($ncid(netauth.user)),$style(2)) $iif($nget($tab(auth,~global~,alwaysmatch)) == $iifelse($ncid(netauth.user),$me),$style(1)) Always match this account:nset $tab(auth,~global~,alwaysmatch) $iif($nget($tab(auth,~global~,alwaysmatch)) == $iifelse($ncid(netauth.user),$me), $ifmatch)
+.$iif($ncid(can_dccallow),DCC Allow)
+..Add:.quote dccallow + $+ $$input(Add user from DCC Allow list $+ $chr(58),e, DCC Allow Add)
+..Del:.quote dccallow - $+ $$input(Delete user from Dcc Allow list $+ $chr(58),e, DCC Allow Delete)
+..List:.quote dccallow list
+..-
+..Help:.quote dccallow help
+.$iif(($ncid(can_callerid) && g isincs $usermode),CallerID Settings) { dlg ircn.service.callerid }
+.$iif($ncid(can_silence),Silence)
+..Silence $iif($hget($cid $+ .ircn.services.silence,0).item,$paren($ifmatch active)):dlg ircn.servicesilence
+..-
+..Add:silence + $+ $$input(Enter hostmask or nickname [ $crlf ] ex: *!*@*.aol.com or nickname,e)
+..Del:silence - $+ $$input(Enter hostmask or nickname [ $crlf ] ex: *!*@*.aol.com or nickname,e)
+..List:silence 
+..-
+..Help:_silencehelp
+$iif($ncid(show.ircdstatuswin),  $nget(ircdsupport) IRCd)
+.$null : !
+$iif($ncid(show.netstatuswin), $lower($nget(networksupport)))
+.$null : !
+$iif(($ismod(ircop) && $connected && $ncid(is_ircop)), IrcOP)
+.$null : !
+-
+History
+.Event Viewer:!
+.Log Viewer:logview
+.-
+.Server
+..$submenu($_popup.recentserver($1))
+..-
+..$iif($nvar(recentservers),Clear):nvar recentservers
+.Network
+..$submenu($_popup.recentnetwork($1))
+..-
+..$iif($nvar(recentnetworks),Clear):nvar recentnetworks
+.$iif($connected,Channel)
+..Clear:{ iecho To clear history use Tools -> Clear History | remini $mircini chanhist | saveini }
+..-
+..$submenu($_popup.chanhistory($1))
+.$iif(($connected && $nget(recentquery)),Query)
+..$submenu($_popup.tokenlist($1, $nget(recentquery), 44, query).num)
+..-
+..$iif($nget(recentquery),Clear):nset recentquery
+.$iif(($connected && $nget(recentnotice)),Notice)
+..$submenu($_popup.tokenlist($1, $nget(recentnotice), 44, .timer 1 0 editbox -p /notice ).num)
+..-
+..$iif($nget(recentnotice),Clear):nset recentnotice
+.$iif(($connected && $nget(recentdccchat)),Chat)
+..$submenu($_popup.tokenlist($1, $nget(recentdccchat), 44, .timer 1 0 dcc chat ).num)
+..-
+..$iif($nget(recentdccchat),Clear):nset recentdccchat
+.$iif(($nget(recentwhois) && $connected),Whois)
+..$submenu($_popup.recentwhois($1))
+..-
+..$iif($nget(recentwhois),Clear):nset recentwhois
+.$iif($nvar(log.transfers),Download)
+..sdsd:!
+.-
+.Clear All { 
+  var %a = $Input(Are you sure you want to clear all of your history data?,y)
+  if (!%a) return
+  nvar recentservers
+  nvar recentnetworks 
+  remini $mircini chanhist
+  nset recentwhois
+  nset recentquery
+  saveini
+  ;ask if they want to remove ircn specific history
+  if (!$lock(com)) { 
+    iecho Cleared ircN's history, you must also clear mIRC's built-in history.
+    sendkey ^+{DEL}
+  }
+  else   iecho To clear mIRC's built-in history use menu Tools -> Clear History 
+}
+$iif($connected,E&xtras)
+;.Maintenence
+;..$style(2) $tab - Clear Memory - :!
+;..$iif($ial(*,0),Clear IAL $tab $paren($bytes($ialtotalbytes).suf))) { var %c = $ialnum, %b = $ialtotalbytes, %a = $$input(Are you sure you would like to clear your Internal Address Listing? This may cause problems with userlist features. Use /updial in your channel to repair.,y) | if (%a) { clearial | iecho Cleared IAL of $sc(%c) records on $curnet $paren($hc($alof(%b)))  }  }  
+;..Buffer Size $cmdtip(membuff) :{ membuff }
+.$iif($connected,Nick Find $cmdtip(nickfind)):nickfind $$input(Enter a nickname $+ $chr(44) ip address $+ $chr(44) hostname $+ $chr(44) or hostmask,e,Nickfind)
+-
+&Sessions
+.$null : !
+&Windows
+.$null : !
+-

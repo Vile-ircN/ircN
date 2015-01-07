@@ -1,0 +1,162 @@
+$iif($notifyison($1) == $false, $style(2) - User is offline - ):!
+$iif($1,$shorttext(12,$1)) 
+.$iif($ial($1),$style(2) $chr(9) - Cached Whois -):!
+.$iif($canqwhois($1) ,$qwhois($1) $style(2) $tab Whois information updated. Re-open this popup for new cache) : !
+.$iif($cwiaddr($1), $1 $tab  $cwiaddr($1) ) : dns $1
+.$iif($cwiident($1), Ident $+ $chr(58) $tab $cwiident($1)), :!
+.$iif($usr($1),Userlist $+ $chr(58) $tab $usr($1)): uwhois $usr($1)
+.$iif($cwiget($1,regeduser),Registered $+ $chr(58) $tab $cwiget($1,regeduser)) : iecho CacheWhois: $hc($1) is a registered user on this network. Their username is $sc($cwiget($1,regeduser))
+.$iif($cwiget($1,cdns),IP-Addr $+ $chr(58) $chr(9) $cwiget($1,cdns)) : dns $cwiget($1,cdns)
+.$iif($cwiget($1,geocity),City $+ $chr(58)  $tab  $cwiget($1,geocity)) :geoip $1
+.$iif($cwiget($1,georeg),$iif($cwiget($1,geocount) == United States,State,Region) $+ $chr(58)  $tab  $cwiget($1,georeg)) :geoip $1
+.$iif($cwiget($1,geocount),Country $+ $chr(58)  $tab  $cwiget($1,geocount)) : geoip $1
+.$iif($cwiget($1,geolat),Coords $+ $chr(58)  $tab $cwiget($1,geolat) $+ $chr(44) $+ $cwiget($1,geolong) ) : www https://maps.google.com/maps?q= $+ $cwiget($1,geolat) $+ $chr(44) $+ $cwiget($1,geolong) $+ &hl=en&t=h&z=16
+.-
+.$iif($cwiget($1,ircname),Real Name $+ $chr(58) $chr(9) $cwiget($1,ircname)) :!
+.$iif($cwiget($1,server),Server $+ $chr(58) $chr(9) $cwiget($1,server) $iif($cwiget($1,hops),$paren($cwiget($1,hops) hops))) :!
+.$iif($cwiget($1,umode),Usermode $+ $chr(58) $chr(9) + $+ $cwiget($1,umode)) :iecho User $hc($1) currently has usermodes of: + $+ $hc($cwiget($1,umode))
+.$iif($cwiget($1,umode.ircop),ircOP Flags $+ $chr(58) $chr(9) + $+ $cwiget($1,umode.ircop)) :iecho User $hc($1) currently has ircOP flags of: + $+ $hc($cwiget($1,umode.ircop))
+.$iif($cwiget($1,chans),Channels $+ $chr(58) $chr(9) $cwiget($1,chans) $iif($numtok($cwiget($1,chans),32) > 7, ...)) $+ :!
+.$iif($cwiget($1,idle),Idle $+ $chr(58) $chr(9) $rsc2($duration($cwiget($1,idle)))) $iif($cwiget($1,idle) >= 3600,$paren($asctime.short($calc($ctime - $cwiget($1,idle))),[,]))):iecho CacheWhois: $hc($1) was idle for $hc($rsc2($duration($cwiget($1,idle)))) when last whois'd  $ac($rsc2($duration($calc($ctime - $cwiget($1,cwhois))))) ago. They were last active at $sc($asctime.short($calc($ctime - $cwiget($1,idle)))) $+ .
+.$iif((!$notifyison($1) && $nget(notify. $+ $1 $+ .lastseen)),Last Online $+ $chr(58) $tab $rsc2($duration($calc($ctime - $gettok($nget(notify. $+ $1 $+ .lastseen),1,32)))) $iif($calc($ctime - $gettok($nget(notify. $+ $1 $+ .lastseen),1,32)) >= 3600,$paren($asctime.short($gettok($nget($+(notify.,$1,.lastseen)),1,32)),[,])) ) {
+  iecho Notify: I last saw $hc($1) online $hc($rsc2($duration($calc($ctime - $gettok($nget(notify. $+ $1 $+ .lastseen),1,32))))) ago on $ac($asctime.short($gettok($nget($+(notify.,$1,.lastseen)),1,32))) $+ . 
+}
+.$iif($lastactive($1),Last Active $+ $chr(58) $chr(9) $rsc2($duration($gettok($lastactive($1),1,32))) $iif($gettok($lastactive($1),1,32) >= 3600,$paren($asctime.short($calc($ctime - $gettok($lastactive($1),1,32))),[,])) $paren($gettok($lastactive($1),2,32))) {
+  var %w = $iif($gettok($lastactive($1),2,32) == query,$1,$gettok($lastactive($1),2,32)) 
+  if ($window(%w)) { 
+    if ($$input(Would you like to scroll to the position where $1 was last active in %w ?,y,Scroll back)) {
+      window -a %w 
+      .timer 1 $iif($active == %w,0,1) findtext $1
+    }
+  } 
+}
+.$iif($cwiget($1,lastnick),Last Nick $+ $chr(58) $tab $cwiget($1,lastnick)) :iecho The last nickname $hc($1) was using was $sc($cwiget($1,lastnick))
+.$iif($cwiget($1,awaymsg),Away $+ $chr(58) $chr(9) $cwiget($1,awaymsg)) $+ :!
+.$iif($cwiget($1,signon) isnum,Ontime $+ $chr(58) $chr(9) $rsc2($duration( $sub($ctime,$cwiget($1,signon)))) $paren($asctime.short($cwiget($1,signon)),[,])) :iecho CacheWhois: $hc($1) has been signed on for $hc($rsc2($duration( $sub($ctime,$cwiget($1,signon))))) when last whois'd $ac($rsc2($duration($calc($ctime - $cwiget($1,cwhois))))) ago. They signed on at $sc($asctime.short($cwiget($1,signon))) $+ .
+.-
+.$iif($window($active).type == chat,DCC Status $+ $chr(58) $tab $firstcap($chat($1).status)) :!
+.$iif(($window($active).type == chat && $chat($1).status == active),DCC Idle $+ $chr(58) $tab $rsc2($duration($chat($1).idle))) :!
+.$iif($window($active).type == chat,DCC IP $+ $chr(58) $tab $chat($1).ip) :dns $chat($1).ip
+.-
+.$iif($cwiget($1,ircop),IrcOP) :!
+.$iif($cwiget($1,away),Away) :!
+.-
+.$style(2) $tab - Commands -  :!
+.Whois $cmdtip(wi) { wi $1 }
+.$iif(!$nvar(alwaysidlewhois),Idle Whois $cmdtip(wii)) { wii $1 }
+.$iif($cwiget($1,cwho), Cache Whois $cmdtip(cwi)) { cwhois $1 }
+.-
+.Dns $cmdtip(dns) { dns $1 }
+.Who $cmdtip(who) { who $1 }
+.$iif($istok($ncid(server_CMDS),userip,44), UserIP $cmdtip(userip) ) { .quote userip $1 }
+.User Central $cmdtip(uwho) { uwho $1 }
+.$iif($ismod(userlist),Userlist Whois $cmdtip(uwhois) ) { if ($usr($1)) uwhois $ifmatch | else uwhois $1 }
+.$submenu($_popup.sub(query, info, $1))
+-
+$iif(($window($active).type == chat && $chat($1).status == inactive),Restart DCC Chat) { dcc chat $1 }
+$iif(($menutype == notify || $window($active).type == chat),Query) { query $1 }
+.-
+Settings
+.Alert on Msgs
+..$style(2) - $1 - :!
+..$toggled($iif($queryget($1,alertmsg) == off,on)) Disabled:queryset $1 alertmsg  off
+..$toggled($iif($queryget($1,alertmsg) == on,on)) Enabled:queryset $1 alertmsg on
+..$toggled($iif(!$queryget($1,alertmsg),on)) Default:queryset $1 alertmsg
+..Sound
+...$toggled($iif($queryget($1,alertsound) == off,on)) Disabled:queryset $1 alertsound off
+...$toggled($iif($queryget($1,alertsound) == on,on)) Enabled:queryset $1 alertsound on
+...$toggled($iif(!$queryget($1,alertsound),on)) Default:queryset $1 alertsound
+...-
+...Select sound file $paren($iifelse($nopath($queryget($1,alertsound.sound)),<default>)):queryset $1 alertsound.sound $$sfile($iifelse($nofile($queryget($1,alertsound.sound)),$mircdir) $+ \*.wav,Select sound to play when msged by $1)
+...$iif($iifelse($queryget($1,alertsound.sound),$queryget(~global~,alertsound.sound)),Test sound file...):splay $qt($iifelse($queryget($1,alertsound.sound),$queryget(~global~,alertsound.sound)))
+...-
+...$toggled($iif($queryget($1,alertsound.firstonly) == on,on)) Alert on first msg only:queryset $1 alertsound.firstonly on
+..Tooltip
+...$toggled($iif($queryget($1,alerttip) == off,on)) Disabled:queryset $1 alerttip off
+...$toggled($iif($queryget($1,alerttip) == on,on)) Enabled:queryset $1 alerttip on
+...$toggled($iif(!$queryget($1,alerttip),on)) Default:queryset $1 alerttip
+...-
+...$toggled($iif($queryget($1,alerttip.firstonly) == on,on)) Alert on first msg only:queryset $1 alerttip.firstonly on
+..-
+..$style(2) - Global - :!
+..$toggled($nvar(query.alertmsg)) Enabled:nvartog query.alertmsg
+..Sound
+...$toggled($nvar(query.alertsound)) Enabled:nvartog query.alertsound
+...Disabled:!
+...-
+...Sound $paren(bleh.wav):!
+...Alert on first msg only :!
+..Tooltip
+...Enabled:!
+...Disabled:!
+...-
+...Alert on first msg only :!
+.Strip Colors
+..$style(2) - $1- :!
+..$toggled($iif($nget($tab(query,stripcodes,$1)) == off,on)) Disabled:nset $tab(query,stripcodes,$1) off
+..$toggled($iif($nget($tab(query,stripcodes,$1)) == on,on)) Enabled:nset $tab(query,stripcodes,$1) on
+..$toggled($iif(!$nget($tab(query,stripcodes,$1)),on)) Default:nset $tab(query,stripcodes,$1) 
+..-
+..$style(2) - Global - :!
+..$toggled($nvar(query.stripcodes)) Enabled:nvartog query.stripcodes
+.Temp. add queries to notify
+..$style(2) - $1- :!
+..$toggled($iif($nget($tab(query,stripcodes,$1)) == off,on)) Disabled:nset $tab(query,stripcodes,$1) off
+..$toggled($iif($nget($tab(query,stripcodes,$1)) == on,on)) Enabled:nset $tab(query,stripcodes,$1) on
+..$toggled($iif(!$nget($tab(query,stripcodes,$1)),on)) Default:nset $tab(query,stripcodes,$1) 
+..-
+..$style(2) - Global - :!
+..$toggled($nvar(query.stripcodes)) Enabled:nvartog query.stripcodes
+$iif(($1 && $1 != $me),Notes)
+Logging
+.$style(2) $tab - $triml($active,=) - :return
+.$iif($window($active).logfile, $style(1)) On:log on
+.$iif(!$window($active).logfile, $style(1)) Off:log off
+.-
+.$iif(($window($active).logfile || ($ismod(logviewer.mod) && $active == status window)),$style(2) $tab - Logs -):!
+.$iif($window($active).logfile, View Log $cmdtip(logview)):logview $window($active).logfile
+.$iif((!$window($active).logfile && $ismod(logviewer.mod) && $active == status window), View Logs):logview  
+.$iif(($istok(channel query,$menutype,32)) && ($ismod(logviewer.mod)) && ($isfile($window($active).logfile)),Search Log $cmdtip(slog)) { var %q = $$input(Enter your search string. Wildcards are allowed,e, Search $menutype log $iif($menutype == query,with,in) $active) | slog $qt(%q) }
+.$iif($window($active).logfile, Delete Log):{ var %a = $$input(Are you sure you want to remove ' $+ $nopath($window($active).logfile) $+ ' ?,y) | if (%a) { .iecho remove -b $qt($window($active).logfile)  }  } 
+-
+Notify
+.$iif($menutype != notify,Add global notify) { notify $1 }
+.$iif($menutype != notify,Add notify on $shorttext(10,$curnet)) { notify -n $1 $curnet }
+.-
+.$iif($notify($1),Remove notify) { notify -r $1 }
+Ignore
+.Ignore $iif($ismod(classicui),$cmdtip(iignore)) {
+  if ($ismod(classicui)) iignore $$1
+  else {
+    .ignore -a $$1 2 
+    iecho Added $hc($1) to perm ignore list.
+  }
+}
+.-
+.60s ignore { .ignore -au60 $$1 2 | iecho Added $hc($1) to ignore list for 60 seconds. }
+$iif($ncid(can_silence),Silence)
+.Add:silence + $+ $iif($address($1,3), $ifmatch, $1) 
+.Rem:silence - $+ $iif($address($1,3), $ifmatch, $1) 
+.List:silence 
+.-
+.Help:_silencehelp
+-
+Dcc
+.Send File { dcc send $1 }
+.$iif(=* !iswm $active,Chat)  { dcc chat $1 }
+Ctcp
+.Ping { ctcp $1 ping }
+.Time { ctcp $1 time }
+.Finger { ctcp $1 finger }
+.Page { ctcp $1 page $$input(Page message:,e) }
+.Version { ctcp $1 version }
+.xDCC
+..List { ctcp $1 xdcc list }
+..Help { ctcp $1 xdcc help }
+..Send { ctcp $1 xdcc send #$$?="Enter pack #" }
+..Queue { ctcp $1 xdcc queue }
+.-
+.Other { ctcp $1 $$?="Enter ctcp request" }
+E&xtras
+.Invite { invite $1 #$$?="Inviting [ $1 ] to channel:" }
+&Windows

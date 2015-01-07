@@ -1,0 +1,159 @@
+irc&N
+-
+&Setup
+.Setup $tab $paren($_fkeys.findcmd(setup),[,]) :setup
+.$submenu($_popup.sub(menu, setupmain, $1))
+.-
+.$submenu($_popup.sub(menu, setup, $1))
+.$iif($isalias(themesetup), Theme Settings) { themesetup }
+; .-
+; .Help:ihelp
+&Quick settings
+.$toggled($nvar(splash)) Splash screen:nvartog splash
+.$toggled($nvar(tinyswitchbar)) Compact Switchbar:{ nvartog tinyswitchbar | tinysb $iif($nvar(tinyswitchbar) == on, on, off) }
+.$toggled($nvar(hidenetwin)) Compact Custom Windows:{ nvartog hidenetwin | hidenetwin $iif($nvar(hidenetwin) == on, on, off) }
+.$toggled($nvar(ipondns)) Copy IP on DNS:nvartog ipondns
+.$toggled($nvar(nickcomp)) Nick completion:nvartog nickcomp
+.$toggled($nvar(queuedwho)) /who queue (BNC fix):nvartog queuedwho
+.$toggled($nvar(whowasonnowhois)) /whowas on no /whois:nvartog whowasonnowhois
+.Set maximum IAL  $paren($iif($isnumnotnull($nvar(maxial)),$v1,300)):iecho nvar maxial $iif($isnumnotnull($input(Maximum amount of people on channel to fill IAL: (default: 300),e)),$v1,300)
+.Save settings every $paren($iif($isnumnotnull(%savetime),%savetime,5) mins):{ set %savetime $remove($iif($isnumnotnull($input(Amount of time between each save: $paren(in minutes $+ $chr(44) default: 5),e),1-60),$v1),5) | if (!%savetime) { unset %savetime } }
+.Day change notify
+..$toggled($nvar(daychange)) Enabled:nvartog daychange
+..-
+..$toggled($nvar(daychange.onlyactive)) Only in active windows:nvartog daychange.onlyactive
+..$toggled($nvar(daychange.notqueries)) Not in queries:nvartog daychange.notqueries
+.Transfer
+..Passive
+...$iif($ntmp(dccpassive) == on,$style(1)) On { dcc passive on | iecho DCC Passive mode enabled. }
+...$iif(!$ntmp(dccpassive),$style(1)) Off { dcc passive off | iecho DCC Passive mode disabled. }
+...-
+...Help { help Passive DCCs }
+..Fast Send
+...$iif($ntmp(fastsend) == on,$style(1)) On { fsend on | iecho Fast Send mode enabled. }
+...$iif(!$ntmp(fastsend),$style(1)) Off { fsend off | iecho Fast Send mode disabled. }
+...-
+...Help { help /fsend }
+..Pump DCC
+...$iif($ntmp(pumpdcc) == on,$style(1)) On { .pdcc on | iecho Pump DCC mode enabled. }
+...$iif(!$ntmp(pumpdcc),$style(1)) Off { .pdcc off | iecho Pump DCC mode disabled. }
+...-
+...Help { help /pdcc }
+.Cache whois
+..$toggled($nvar(cachewhois)) Enabled:nvartog cachewhois
+..-
+..$toggled($nvar(cachewhois.updateonmenu)) Auto update whois on menu:nvartog cachewhois.updateonmenu
+.Lagstats
+..$toggled($nvar(lagstat)) Enabled:nvartog lagstat
+..Min lag to echo $iif($nvar(lagstat.time),$paren($+($ifmatch,secs))):nvar lagstat.time $?="Amount of time (in seconds) for lagstat alert to trigger:"
+.$iif($ismod(userlost),Bot)
+..$toggled($nvar(userlist.botgetops)) Auto get ops:nvartog userlist.botgetops
+..$toggled($nvar(userlist.autoop)) Auto op:nvartog userlist.autoop
+..$toggled($nvar(userlist.reopbot)) Reop on deop:nvartog userlist.reopbot
+..$toggled($nvar(userlist.voiceonbotdeop)) Voice on deop:nvartog userlist.voiceonbotdeop
+..$toggled($nvar(userlist.botautopass)) Auto pass on partyline:nvartog userlist.botautopass
+.Kickban hostmask
+..$toggled($iif($nvar(kbmask) == 1,on)) 1. $mask(nick!ident@dyn.host.com,1):nvar kbmask 1
+..$toggled($iif($nvar(kbmask) == 2,on)) 2. $mask(nick!ident@dyn.host.com,2):nvar kbmask 2
+..$toggled($iif($nvar(kbmask) == 3,on)) 3. $mask(nick!ident@dyn.host.com,3):nvar kbmask 3
+..$toggled($iif($nvar(kbmask) == 4,on)) 4. $mask(nick!ident@dyn.host.com,4):nvar kbmask 4
+..$toggled($iif($nvar(kbmask) == 5,on)) 5. $mask(nick!ident@dyn.host.com,5):nvar kbmask 5
+..$toggled($iif($nvar(kbmask) == 6,on)) 6. $mask(nick!ident@dyn.host.com,6):nvar kbmask 6
+..$toggled($iif($nvar(kbmask) == 7,on)) 7. $mask(nick!ident@dyn.host.com,7):nvar kbmask 7
+..$toggled($iif($nvar(kbmask) == 8,on)) 8. $mask(nick!ident@dyn.host.com,8):nvar kbmask 8
+..$toggled($iif($nvar(kbmask) == 9,on)) 9. $mask(nick!ident@dyn.host.com,9):nvar kbmask 9
+.-
+.Channel settings
+..$style(2) - Global settings -:return
+..$toggled($nvar(autocycle)) Autocycle empty chan:nvartog autocycle
+..$toggled($nvar(netsplit)) Netsplit detector:nvartog netsplit
+..$toggled($nvar(kickonban)) Kick on ban:nvartog kickonban
+..$toggled($nvar(voiceall)) Voice all users:nvartog voiceall
+..$toggled($nvar(clearbans)) Clear bans on join:nvartog clearbans
+..$toggled($nvar(setonjoinmode)) Mode on join $iif($nvar(onjoinmode),$paren($ifmatch)):{ nvar onjoinmode $?="What mode to set? $+ $crlf $+ (ie. +stn, empty or cancel for off)" | nvar setonjoinmode $iif($nvar(onjoinmode),on) }
+.Network settings
+..$iif($server,$style(2) - Global settings -) :!
+..Usermode
+...Default Usermode $+ $chr(58) $tab $paren($iifelse($nvar(umode),______),[,]) :nvar umode $input(Default usermode to use for global connections $paren(ie. +i $+ $chr(44) or leave empty to clear it),e)
+..Settings expiration
+...$iif($nvar(netsettingskeep),$style(2)) Age $+ $chr(58) $tab $paren($iifelse($nvar(netsettingsexpiredays) days,______),[,])  :nvar netsettingsexpiredays $$input(Enter the number of days that have passed before deleting the unused network setting file.,e,ircN Network Settings Expiration,$iifelse($nvar(netsettingsexpiredays),30))
+...-
+...$toggled($nvar(netsettingskeep)) Never Expire :nvartog netsettingskeep
+..$toggled($nvar(autoupdatelinks)) Auto update links:nvartog autoupdatelinks
+..$toggled($nvar(keepserverlistfresh))  Keep servers fresh:nvartog keepserverlistfresh
+..$toggled($nvar(reconnectonkill))  Reconnect on kill:nvartog reconnectonkill
+..-
+&Modules
+.Modules:modules
+.-
+.$submenu($_popup.sub(menu, setup.modules, $1))
+&Customize
+.Highlights $cmdtip(highlight) : abook -h
+.Nicklist colors
+..$style(2) $tab - Nicklist - :!
+..Set Colors $cmdtip(nickcol): nickcol
+..Color Style
+...$toggled($iif($nvar(colnick) != on,on)) Disabled:colnick off
+...$toggled($iif($nvar(colul) && $nvar(colnick) == on,on)) Userlist style:{ nvar colul on | colnick on }
+...$toggled($iif($nvar(colul) != on && $nvar(colnick) == on,on)) Theme style:{ nvar colul | colnick on }
+..-
+..$style(2)  $tab - Channel - :!
+..Set Colors $cmdtip(chancolor) : chancolor
+E&xtras
+.Maintenence
+..$style(2) $tab - Clear Memory - :!
+..Internal Address List $cmdtip(memial) {
+  ; var %c = $ialglobalnum, %b = $ialtotalglobalbytes, %a = $$input(Are you sure you would like to clear your Internal Address Listing? This may cause problems with userlist features. Use /updial in your channel to repair.,y) | if (%a) { ialclearglobal | iecho Cleared IAL of $sc(%c) records on all sessions $paren($hc($alof(%b)))  }  
+  memial
+}   
+..Buffer Size $cmdtip(membuff) :{ membuff }
+.Hide Chans
+..Setup:dlg -r ircn.hidechan
+..-
+..$iif($hiddenchans,Show chans $paren($v1,[,]) ) { showchans }
+..$iif($hideablechans,Hide chans $paren($v1,[,])) {
+  if (!$nvar(hidechans)) { dlg -r ircn.hidechan | iecho You have no hidden channels set up. Please add your channels you want hidden to the list. }
+  else hidechans
+}
+.-
+.Event Log:elog
+.$iif($ismod(hlist.mod),Hash List):hlist
+.Socket List:socklist
+.Timers:timers
+.$iif($debug,$style(1)) Raw Log:rawlog
+.$iif($server,Network Timers):ntimer
+.$iif($server,Network Info):netinfo
+.$iif($url(0),URL Catcher):url show
+.$submenu($_popup.sub(menu, extras, $1))
+Information
+.About { about }
+.-
+.Version $+ $chr(58) $tab $nvar(ver)  :!
+.Release Date $+ $chr(58) $tab $reldate(mm.dd.yyyy) :!
+.mIRC $+ $chr(58) $tab $version :!
+.Uses $+ $chr(58) $tab $nvar(uses) time $+ $plural($nvar(uses)) :!
+.$iif($onlinetotal,On IRC $+ $chr(58) $tab  $trimdur($onlinetotal,$iif($onlinetotal > 60,s)) ):!
+.$iif($nvar(installed),Installed $+ $chr(58)  $tab $asctime($nvar(installed),mm.dd.yyyy)) :!
+.-
+.$iif($connected,Network Info $tab $cmdtip(netinfo) ) { netinfo }
+.-
+.$style(2) $tab - Support - :!
+.Website $+ $chr(58) $tab www.ircN.org :www http://www.ircn.org
+.Support Site: www https://sourceforge.net/projects/ircn/support
+.Bug Report : www https://sourceforge.net/tracker/?group_id=10144&atid=110144
+.Feature Suggest :www https://sourceforge.net/tracker/?group_id=10144&atid=360144
+..-
+..Join $+($chr(35),ircN) { joinircn }
+; .iHelp $cmdtip(ihelp) { ihelp }
+; .iScript $cmdtip(iscript) { iscript }
+-
+$iif($connected,&Contacts)
+&Away
+.$iif((!$ismod(away.mod) && !$away),Set away) :{ .quote away $$?="Away reason?" }
+.$iif((!$ismod(away.mod) && $away),Set back) :{ .quote away }
+$null : !
+&Sessions
+.$null : !
+&Windows
+.$null : !
+-

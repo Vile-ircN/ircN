@@ -1,0 +1,315 @@
+$iif($1,$shorttext(12,$1)) 
+.$iif($cwiget($1,cwhois), $style(2) $tab - Cached Information - ):!
+.$iif($canqwhois($1) ,$qwhois($1) $style(2) $tab Re-open this popup for an updated cache, $iif($cwiget($1,cwhois),$style(2) $tab Updated $rsc2($duration($calc($ctime - $cwiget($1,cwhois)))) ago )) : !
+.$iif($cwiaddr($1), $1 $tab  $cwiaddr($1) ) : dns $1
+.$iif($cwiident($1), Ident $+ $chr(58) $tab $cwiident($1)), :!
+.$iif($usr($1),Userlist $+ $chr(58) $tab $usr($1)): uwhois $usr($1)
+.$iif($cwiget($1,regeduser),Registered $+ $chr(58) $tab $cwiget($1,regeduser)) : iecho CacheWhois: $hc($1) is a registered user on this network. Their username is $sc($cwiget($1,regeduser))
+.$iif($cwiget($1,cdns),IP-Addr $+ $chr(58) $tab $cwiget($1,cdns)) : dns $cwiget($1,cdns)
+.$iif($cwiget($1,geocity),City $+ $chr(58)  $tab  $cwiget($1,geocity)) :geoip $1
+.$iif($cwiget($1,georeg),$iif($cwiget($1,geocount) == United States,State,Region) $+ $chr(58)  $tab  $cwiget($1,georeg)) :geoip $1
+.$iif($cwiget($1,geocount),Country $+ $chr(58)  $tab  $cwiget($1,geocount)) : geoip $1
+.$iif($cwiget($1,geolat),Coords $+ $chr(58)  $tab $cwiget($1,geolat) $+ $chr(44) $+ $cwiget($1,geolong) ) : www https://maps.google.com/maps?q= $+ $cwiget($1,geolat) $+ $chr(44) $+ $cwiget($1,geolong) $+ &hl=en&t=h&z=16
+.$iif($cwiget($1,geotz), Time $+ $chr(58) $tab $_popup.usertimezone($1,$replace($cwiget($1,geotz),$chr(58),.))    ) { iecho The current time for $hc($1) is  $+ $sc $+ $_popup.usertimezone($1,$replace($cwiget($1,geotz),$chr(58),.),ddd mmm ddoo hh $+ $chr(58) $+ nn  $+ $chr(58) $+  sstt yyyy)  }
+.-
+.$iif($cwiget($1,ircname),Real Name $+ $chr(58) $chr(9) $cwiget($1,ircname)) :!
+.$iif($cwiget($1,server),Server $+ $chr(58) $chr(9) $cwiget($1,server) $iif($cwiget($1,hops),$paren($cwiget($1,hops) hops))) :!
+.$iif($cwiget($1,umode),Usermode $+ $chr(58) $chr(9) + $+ $cwiget($1,umode)) :iecho User $hc($1) currently has usermodes of: + $+ $hc($cwiget($1,umode))
+.$iif($cwiget($1,umode.ircop),ircOP Flags $+ $chr(58) $chr(9) + $+ $cwiget($1,umode.ircop)) :iecho User $hc($1) currently has ircOP flags of: + $+ $hc($cwiget($1,umode.ircop))
+.$iif(($1 != $me && $cwiget($1,chans)),Channels $+ $chr(58) $chr(9) $cwiget($1,chans) $iif($numtok($cwiget($1,chans),32) > 7, ...)) $+ :!
+.$iif(($1 == $me && $mychans),Channels $+ $chr(58) $tab $shorttext(35,$replace($com.channels($me).prefix,$chr(44),$chr(32)))) :iecho You are in the channel $+ $plural($numtok($mychans,44)) $+ : $hc($replace($mychans,$chr(44),$chr(32)))
+.$iif(($1 != $me && $comchan($1,0) > 1),Common $+ $chr(58) $chr(9) $replace($com.channels($1).prefix,$chr(44),$chr(32))) $+ :!
+.$iif($cwiget($1,lastnick),Last Nick $+ $chr(58) $tab $cwiget($1,lastnick)) :iecho The last nickname $hc($1) was using was $sc($cwiget($1,lastnick))
+.$iif($lastactive($1),Last Active $+ $chr(58) $chr(9) $rsc2($duration($gettok($lastactive($1),1,32))) $iif($gettok($lastactive($1),1,32) >= 3600,$paren($asctime.short($calc($ctime - $gettok($lastactive($1),1,32))),[,])) $paren($gettok($lastactive($1),2,32))) {
+  var %w = $iif($gettok($lastactive($1),2,32) == query,$1,$gettok($lastactive($1),2,32)) 
+  if (!$fline(%w,* $+ $1 $+ *)) { iecho Can't scroll to where $hc($1) was active because I can't find it in the %w buffer. $iif($ismod(logviewer.mod),To search the channel log please use: /slog $1)  | return }
+  if ($window(%w)) { 
+    if ($$input(Would you like to scroll to the position where $1 was last active in %w ?,y,Scroll back)) {
+      window -a %w 
+      .timer 1 $iif($active == %w,0,1) findtext $1
+    }
+  } 
+}
+.$iif($cwiget($1,idle),Idle $+ $chr(58) $chr(9) $rsc2($duration($cwiget($1,idle)))) $iif($cwiget($1,idle) >= 3600,$paren($asctime.short($calc($ctime - $cwiget($1,idle))),[,]))):iecho CacheWhois: $hc($1) was idle for $hc($rsc2($duration($cwiget($1,idle)))) when last whois'd  $ac($rsc2($duration($calc($ctime - $cwiget($1,cwhois))))) ago. They were last active at $sc($asctime.short($calc($ctime - $cwiget($1,idle)))) $+ .
+.$iif(($cwiget($1,awaymsg) && $1 != $me),Away $+ $chr(58) $chr(9) $shorttext(25,$strip($cwiget($1,awaymsg)))) $+ :iecho CacheWhois: $hc($1) is away $+ $chr(58) $cwiget($1,awaymsg)
+.$iif(($away && $1 == $me),Away $+ $chr(58) $chr(9) $shorttext(15,$strip($awaymsg))) $+ :iecho CacheWhois: $hc($1) is away $+ $chr(58) $awaymsg
+.$iif($cwiget($1,signon) isnum,Ontime $+ $chr(58) $chr(9) $rsc2($duration( $sub($ctime,$cwiget($1,signon)))) $paren($asctime.short($cwiget($1,signon)),[,])) :iecho CacheWhois: $hc($1) has been signed on for $hc($rsc2($duration( $sub($ctime,$cwiget($1,signon))))) when last whois'd $ac($rsc2($duration($calc($ctime - $cwiget($1,cwhois))))) ago. They signed on at $sc($asctime.short($cwiget($1,signon))) $+ .
+.-
+.$iif($cwiget($1,ircop),IrcOP) :!
+.$iif(($cwiget($1,sslclient) || ($1 == $me && $ssl)),Secure Connection) :!
+.$iif((!$cwiget($1,awaymsg) && $cwiget($1,away) && $1 != $me),Away) :!
+.-
+.$style(2) $tab - Commands -  :!
+.Whois $cmdtip(wi) { wi $1 }
+.$iif(!$nvar(alwaysidlewhois),Idle Whois $cmdtip(wii)) { wii $1 }
+.$iif($cwiget($1,cwho), Cache Whois $cmdtip(cwi)) { cwhois $1 }
+.-
+.Dns $cmdtip(dns) { dns $1 }
+.Who $cmdtip(who) { who $1 }
+.$iif($istok($ncid(server_CMDS),userip,44), UserIP $cmdtip(userip) ) { .quote userip $1 }
+.User Central $cmdtip(uwho) { uwho $1 }
+.$iif($iifelsenull($ialget($1,ulcol),$ialget($1,nickcol)),Re-) $+ Assign Color... $tab $paren($iifelsenull($ialget($1,ulcol),$ialget($1,nickcol))) {
+  var %o = $iifelse($ialget($1,ulcol),$ialget($1,nickcol))
+  var %y =  ialset $1 nickcol, %y2
+  if ((!$usr($1)) && ($ismod(userlist.mod))) {
+    var %q = $input(To permenetly assign a color to $1 $+ 's text you need to add them to your userlist first. Can ircN add this user to your userlist? [ $crlf  ] [ $crlf ] If you would like to only temporarily assign the color press no.,y, ircN nickname coloring)
+    if (%q) { adduser $1  }
+  }
+  var %a 
+  if ($ismod(classicui)) set %a $dialog(ircn.mirccolors,ircn.mirccolors)
+  else set -u1 %mirccolorsdlg.result $stripnonnum($$input(Enter a color number. $paren(Press ctrl+k to choose),e))
+  var %n = $base(%mirccolorsdlg.result,10,10,2)
+  if (%n !isnum) return
+  if (%q) {
+    .chusercol $1 %n 
+    ialset $1 ulcol %n
+    ialset $1 nickcol 
+  }
+  else %y %n
+  iecho Coloring nickname changed  $+  $+ %o $+ $1 $+  to  $+ %n $+ $1 $+ 
+}
+.$submenu($_popup.sub(nicklist, info, $1))
+-
+$iif($1,Query)
+.Query $cmdtip(/q):query $1
+.Notice $cmdtip(/n):editbox -ap /n $1 
+.-
+.$iif(($isfile($logdir $+ $mklogfn($1)) || $isfile($nofile($chan($chan).logfile) $+ $mklogfn($1))), View Log) {
+  logview $iif($isfile($logdir $+ $mklogfn($1)),$logdir $+ $mklogfn($1),$iif($isfile($nofile($chan($chan).logfile) $+ $mklogfn($1)),$nofile($chan($chan).logfile) $+ $mklogfn($1))))
+}
+$iif(($1 && $1 != $me && $ismod(usernotes.mod)),Notes)
+$iif($1,Notify)
+.Add Notify $cmdtip(notify) { 
+  var %a = 1, %b
+  while ($gettok($snicks,%a,44) != $null) { set %b $ifmatch | notify %b | inc %a }
+}
+.Rem Notify $cmdtip(unotify) { 
+  var %a = 1, %b
+  while ($gettok($snicks,%a,44) != $null) { set %b $ifmatch | unotify %b | inc %a }
+}
+$iif(($1 && $ismod(userlist.mod)),Userlist)
+-
+$iif($1,Dcc)
+.Send File { dcc send $1 }
+.Chat { dcc chat $1 }
+.$toggled($nvar(dccrelay)) Relay { dccrelay $iif($nvar(dccrelay) != on,on $network $$input(Enter a nickname to forward DCCs to,e,DCC Relay,$$1),off) }
+.$submenu($_popup.sub(nicklist, dcc, $1))
+$iif($1,Ctcp)
+.$submenu($_popup.sub(nicklist, ctcp, $1))
+.-
+.Ping { ctcp $1 ping }
+.Version { ctcp $1 version }
+.Time { ctcp $1 time }
+.Page { ctcp $1 page $?="page message:" }
+.Finger { ctcp $1 finger }
+.xDCC
+..Send { xget $$1 #$$?="Enter pack $chr(35) to send " }
+..List { xlist $$1- }
+..-
+..Queue { ctcp $1 xdcc queue }
+..Help { ctcp $1 xdcc help }
+.-
+.Other { ctcp $1 $$?="Enter ctcp request" }
+$iif($1,Ignore)
+.Ignore $iif($ismod(classicui),$cmdtip(iignore)) {
+  if ($ismod(classicui)) iignore $$1
+  else {
+    .ignore -a $$1 2 
+    iecho Added $hc($1) to perm ignore list.
+  }
+}
+.-
+.60s Ignore { .ignore -au60 $$1 2 | iecho Added $hc($1) to ignore list for 60 seconds. }
+$iif(($ncid(can_silence) && $1),Silence)
+.Add:silence + $+ $iifelse($address($1,3), $1) 
+.Rem:silence - $+ $iifelse($address($1,3), $1) 
+.List:silence 
+.-
+.Help:_silencehelp
+$iif($1,Filter)
+.Buffer $cmdtip(filt)
+..$style(2) - Show text by $shorttext(25,$1) - :!
+..Filter nickname:filt * $+ $1 $+ *
+..$iif($cwiget($1,lastnick),$style(2) - Show text by $shorttext(25,$cwiget($1,lastnick)) $paren(old nick) - ):!
+..$iif($cwiget($1,lastnick),Filter nickname):filt * $+ $cwiget($1,lastnick) $+ *
+..$iif($ial($1),$style(2) - Show text with $shorttext(25,$gettok($address($1,3),2-,64)) - ):!
+..$iif($ial($1),Filter hostmask):filt * $+ $gettok($address($1,3),2-,64) $+ *
+.$iif(($ismod(logviewer.mod) && ($isfile($chan(#).logfile))),Log $cmdtip(slog))
+..$style(2) - Filter chan log with $shorttext(25,$1) - :!
+..Filter nickname :logview -s * $+ $1 $+ * #
+..$iif($cwiget($1,lastnick),$style(2) - Filter chan log with  $shorttext(25,$cwiget($1,lastnick)) $paren(old nick) - ):!
+..$iif($cwiget($1,lastnick),Filter nickname):logview -s * $+ $cwiget($1,lastnick) $+ * #
+..$iif($ial($1),$style(2) -  Filter chan log with $shorttext(25,$gettok($address($1,3),2-,64)) - ):!
+..$iif($ial($1),Filter hostmask) :logview -s * $+ $gettok($address($1,3),2-,64) $+ * #
+-
+$iif(($me ishop # && $1),Mode)
+.Voice	+v { mmode # + v $1- }
+.De-voice	-v { mmode # - v $1- }
+$iif(($me isop # && $1),Mode)
+.$iif($1 !isop #,Op	+o) { mmode # + o $1- }
+.$iif($1 isop #,De-op	-o) { mmode # - o $1- }
+.-
+.$iif(($1 !ishop # && % isin $ncid(server_prefix)),Half-op	+h):mmode # + h $1-
+.$iif(($1 ishop # && % isin $ncid(server_prefix)),De-halfop	-h):mmode # - h $1-
+.-
+.$iif($1 !isvoice #, Voice	+v) { mmode # + v $1- }
+.$iif($1 isvoice #, De-voice	-v) { mmode # - v $1- }
+.$submenu($_popup.sub(nicklist, mode, $1))
+$iif(($1 && ($me isop # || $me ishop #)),Bans)
+.$iif($ismod(classicui),Ban $cmdtip(bban)):bban $1
+.-
+.Kick Ban
+..Fast { kb $1 }
+..Msg { kb $1 $$?="Enter your reason" }
+..Timed { kb $1 }
+..-
+..Site { sb $1 }
+.Ban
+..$address($snick(#,1),0) { mode # +b $address($1,0) }
+..$address($snick(#,1),1) { mode # +b $address($1,1) }
+..$address($snick(#,1),2) { mode # +b $address($1,2) }
+..$address($snick(#,1),3) { mode # +b $address($1,3) }
+..$address($snick(#,1),4) { mode # +b $address($1,4) }
+..-
+..Other { mode # +b $$?="Enter hostmask (of [ $remove($address($1,0),*!) ] $+ )" }
+.$iif(($issupport(excepts) || $issuport(invex)), Exemption )
+..$iif($issupport(excepts),$style(2)   - Exempt Bans - ): ! 
+..$iif($issupport(excepts),$address($snick(#,1),0)) { mode # +e $address($1,0) }
+..$iif($issupport(excepts),$address($snick(#,1),1)) { mode # +e $address($1,1) }
+..$iif($issupport(excepts),$address($snick(#,1),2)) { mode # +e $address($1,2) }
+..$iif($issupport(excepts),$address($snick(#,1),3)) { mode # +e $address($1,3) }
+..$iif($issupport(excepts),$address($snick(#,1),4)) { mode # +e $address($1,4) }
+..-
+..$iif($issupport(invex),$style(2) - Exempt Invite - ): ! 
+..$iif($issupport(invex),$address($snick(#,1),0)) { mode # +I $address($1,0) }
+..$iif($issupport(invex),$address($snick(#,1),1)) { mode # +I $address($1,1) }
+..$iif($issupport(invex),$address($snick(#,1),2)) { mode # +I $address($1,2) }
+..$iif($issupport(invex),$address($snick(#,1),3)) { mode # +I $address($1,3) }
+..$iif($issupport(invex),$address($snick(#,1),4)) { mode # +I $address($1,4) }
+.$submenu($_popup.sub(nicklist, bans, $1))
+$iif(($1 && ($me isop # || $me ishop #)),Kicks)
+.Fast { kick # $1 }
+.Msg { kick # $1 $$input(Enter your reason,e) }
+.Filter
+..Host $paren($address($1,2))
+...Kick { fk # $address($1,2) $?="Enter reason (cancel for default)" }
+...Kick Ban { fkb # $address($1,2) $?="Enter reason (cancel for default)" }
+..Nick
+...Kick { fk # * $+ $$?="Enter string to search for in nicknames" $+ *!*@* $?="Enter reason (cancel for default)" }
+...Kick Ban { fkb # * $+ $$?="Enter string to search for in nicknames" $+ *!*@* $?="Enter reason (cancel for default)" }
+.$submenu($_popup.sub(nicklist, kicks, $1))
+$iif(($1 && $menucontext != hotlink),Mass)
+.$style(2) $tab - Entire Channel - :!
+.Invite { mi $$?="Mass Inviting to channel" }
+.-
+.$iif($me isop #,Op $cmdtip(mop)):mop
+.$iif($me isop #,De-op $cmdtip(mdop)):mdop
+.-
+.$iif($me isop #,Voice $cmdtip(mv)):mv
+.$iif($me isop #, De-voice $cmdtip(mdv)):mdv
+.-
+.$submenu($_popup.sub(nicklist, mass.entire, $1))
+.$style(2) $tab - Selected Nicknames $brak($numtok($snicks,44)) - :!
+.$iif($numtok($snicks,44) <= 1,  $style(2) $tab * Select more than one nickname * ):return
+.$iif($me isop #, $iif($numtok($snicks,44) <= 1, $style(2)) Kick) {
+  var %a, %z
+  set %z $$?="Enter reason"
+  set %a 1
+  while ($snick(#,%a) != $null) {
+    queue kick $chan $ifmatch : $+ %z
+    inc %a
+  }
+  queue
+}
+.$iif($me isop # ,$iif($numtok($snicks,44) <= 1, $style(2))  Ban) {
+  var %a, %b, %y, %z
+  set %a 1
+  while ($snick(#,%a)) {
+    set %z $address($ifmatch,3)
+    if ($calc($len(%y) + $len(%z)) > 768) {
+      set %b $calc($numtok(%y,32) - ($numtok(%y,32) % $ncid(modesonline)))
+      if (%b == 0) {
+        mmode # + b %y
+        set %y
+      }
+      else {
+        mmode # - b $gettok(%y,$addtok(1,%b,45),32)
+        if ($numtok(%y,32) != %b) set %y $gettok(%y,$addtok(%b,$ifmatch,45),32)
+        else set %y
+      }
+    }
+    set %y $addtok(%y,%z,32)
+    inc %a
+  }
+  if (%y != $null) mmode # + b %y
+}
+.$iif($numtok($snicks,44) <= 1, $style(2)) Invite  {
+  var %a, %z
+  set %z $$?="Enter channel to invite to"
+  set %a 1
+  while ($snick(#,%a) != $null) {
+    queue invite $ifmatch %z
+    inc %a
+  }
+  queue
+}
+.$iif($numtok($snicks,44) <= 1, $style(2)) Ignore {
+  var %a = 1
+  while ($snick(#,%a) != $null) {
+    ignore $ifmatch
+    inc %a
+  }
+}
+.$iif(($ncid(can_silence) && $1),$iif($numtok($snicks,44) <= 1, $style(2)) Silence) {
+  var %a = 1
+  while ($snick(#,%a) != $null) {
+    silence + $+ $address($snick(#,%a),3)
+    inc %a
+  }
+}
+.$iif($numtok($snicks,44) <= 1, $style(2)) Msg $cmdtip(lmsg) { lmsg $$?="Enter message to send:" }
+.$iif($numtok($snicks,44) <= 1, $style(2)) Notice $cmdtip(lnotice) { lnotice $$?="Enter message to send" }
+.$iif($numtok($snicks,44) <= 1, $style(2)) Dns $cmdtip(mdns) { .mdns }
+.$iif($numtok($snicks,44) <= 1, $style(2)) Ctcp  
+..Ping { qctcp $snicks PING $ticks }
+..Time { qctcp $snicks TIME }
+..Finger { qctcp $snicks FINGER }
+..Version { qctcp $snicks VERSION }
+..xDCC list { qctcp $snicks xdcc list }
+..-
+..Other { qctcp $snicks $$?="Enter ctcp" }
+.-
+.$submenu($_popup.sub(nicklist, mass.selected, $1))
+-
+$iif(($1 && $ismod(ircop)),IrcOP)
+.$null :! 
+$iif(($1 && $svc.ispopupok(nicklist)),Services)
+.$null : !
+$iif($1,E&xtras)
+.DblClick Action
+..$iif((!$nvar(ircn.dclick.nicklist) || $istok(q query, $nvar(ircn.dclick.nicklist),32)), $style(1)) Query:!
+..$iif($istok(w whois, $nvar(ircn.dclick.nicklist),32), $style(1)) Whois:!
+..-
+..Custom:!
+.-
+.Channel Invite $cmdtip(invite) { invite $1 $$?="Enter a channel to invite $1 to" }
+.Nickfind $cmdtip(nickfind)
+..By Nick { nickfind $1 } 
+..By Hostmask
+...$address($snick(#,1),0) { nickfind $address($1,0) }
+...-
+...$address($snick(#,1),1) { nickfind  $address($1,1) }
+...$address($snick(#,1),2) { nickfind  $address($1,2) }
+...$address($snick(#,1),3) { nickfind  $address($1,3) }
+...$address($snick(#,1),4) { nickfind  $address($1,4) }
+...-
+...Other { nickfind $$input(Enter a nickname $+ $chr(44) ip address $+ $chr(44) hostname $+ $chr(44) or hostmask,e,Nickfind,$address($1,0)) }
+.$iif($menucontext == hotlink,Filter)
+..$style(2) - Filter out lines like this - :!
+..$iif($menucontext == hotlink,Filter Wizard):{ chanfiltwiz # $1  }
+-
+$iif(!$1,$style(2) - Double Click -) :!
+$iif(!$1, $iif((!$nvar(ircn.dclick.nicklist) || $istok(q query, $nvar(ircn.dclick.nicklist),32)), $style(1)) Query):!
+$iif(!$1, $iif($istok(w wi whois, $nvar(ircn.dclick.nicklist),32), $style(1)) Whois):!
+$iif(!$1,-)
+$iif(!$1,Custom):!
